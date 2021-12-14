@@ -1,64 +1,5 @@
 #include "roof.h"
 
-void seperate1423(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
-{
-    for (ClipperLib::PolyNode* node1 : polyTree->Childs)
-    {
-        std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
-        std::vector<ClipperLib::PolyNode*> node3;
-        for (ClipperLib::PolyNode* n : node2)
-            node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
-        std::vector<ClipperLib::PolyNode*> node4;
-        for (ClipperLib::PolyNode* n : node3)
-            node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
-
-        PolyPair* pair1 = new PolyPair();
-        pair1->clockwise = false;
-        pair1->outer = node1;
-        pair1->inner.swap(node4);
-        polyPairs.push_back(pair1);
-
-        for (ClipperLib::PolyNode* n : node2)
-        {
-            PolyPair* pair = new PolyPair();
-            pair->clockwise = true;
-            pair->outer = n;
-            pair->inner = n->Childs;
-            polyPairs.push_back(pair);
-        }
-    }
-}
-
-void seperate1234(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
-{
-    for (ClipperLib::PolyNode* node1 : polyTree->Childs)
-    {
-        std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
-        std::vector<ClipperLib::PolyNode*> node3;
-        for (ClipperLib::PolyNode* n : node2)
-            node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
-        std::vector<ClipperLib::PolyNode*> node4;
-        for (ClipperLib::PolyNode* n : node3)
-            node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
-
-        PolyPair* pair1 = new PolyPair();
-        pair1->clockwise = false;
-        pair1->outer = node1;
-        pair1->inner.swap(node2);
-        polyPairs.push_back(pair1);
-
-        for (ClipperLib::PolyNode* n : node3)
-        {
-            PolyPair* pair = new PolyPair();
-            pair->clockwise = true;
-            pair->outer = n;
-            pair->inner = n->Childs;
-            polyPairs.push_back(pair);
-        }
-    }
-}
-
-#if defined(WIN32) && defined(USE_CGAL)
 #include <boost/shared_ptr.hpp>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_with_holes_2.h>
@@ -79,8 +20,66 @@ typedef Straight_skeleton::Face_const_handle Face_const_handle;
 
 typedef boost::shared_ptr<Straight_skeleton> Straight_skeleton_ptr;
 
-namespace mmesh
+namespace cmesh
 {
+    void seperate1423(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
+    {
+        for (ClipperLib::PolyNode* node1 : polyTree->Childs)
+        {
+            std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
+            std::vector<ClipperLib::PolyNode*> node3;
+            for (ClipperLib::PolyNode* n : node2)
+                node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
+            std::vector<ClipperLib::PolyNode*> node4;
+            for (ClipperLib::PolyNode* n : node3)
+                node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
+
+            PolyPair* pair1 = new PolyPair();
+            pair1->clockwise = false;
+            pair1->outer = node1;
+            pair1->inner.swap(node4);
+            polyPairs.push_back(pair1);
+
+            for (ClipperLib::PolyNode* n : node2)
+            {
+                PolyPair* pair = new PolyPair();
+                pair->clockwise = true;
+                pair->outer = n;
+                pair->inner = n->Childs;
+                polyPairs.push_back(pair);
+            }
+        }
+    }
+
+    void seperate1234(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
+    {
+        for (ClipperLib::PolyNode* node1 : polyTree->Childs)
+        {
+            std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
+            std::vector<ClipperLib::PolyNode*> node3;
+            for (ClipperLib::PolyNode* n : node2)
+                node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
+            std::vector<ClipperLib::PolyNode*> node4;
+            for (ClipperLib::PolyNode* n : node3)
+                node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
+
+            PolyPair* pair1 = new PolyPair();
+            pair1->clockwise = false;
+            pair1->outer = node1;
+            pair1->inner.swap(node2);
+            polyPairs.push_back(pair1);
+
+            for (ClipperLib::PolyNode* n : node3)
+            {
+                PolyPair* pair = new PolyPair();
+                pair->clockwise = true;
+                pair->outer = n;
+                pair->inner = n->Childs;
+                polyPairs.push_back(pair);
+            }
+        }
+    }
+
     void fill_polygon(Polygon_2& polygon, ClipperLib::Path* path, bool inverse)
     {
         size_t size = path->size();
@@ -385,25 +384,6 @@ namespace mmesh
         }
         pairs.clear();
     }
-
 }
 
-#else
 
-namespace mmesh
-{
-    void buildRoofs(ClipperLib::PolyTree* polyTree, std::vector<std::vector<trimesh::vec3>*>& patches, double roofHeight, double thickness)
-    {
-
-    }
-
-    void roofLine(ClipperLib::PolyTree* polyTree,
-        ClipperLib::PolyTree* roof, ClipperLib::PolyTree* roofPoint, ClipperLib::Paths* roofFace, bool onePoly)
-    {
-    }
-
-    void skeletonPoints(ClipperLib::PolyTree* polyTree, ClipperLib::Path* roofLine)
-    {
-    }
-}
-#endif

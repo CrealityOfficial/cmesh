@@ -44,25 +44,11 @@ set(SRCS cmesh/interface.h
 		 )
 		
 set(INCS ${EIGEN_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
-set(LIBS trimesh2)
+set(LIBS trimesh2 clipper)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED)
 
-if(BUILD_CMESH_STATIC)
-	__add_real_target(cmesh lib SOURCE ${SRCS}
-								  LIB ${LIBS}
-								  DEF ${DEFS}
-								  INC ${INCS}
-								  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-								  SOURCE_FOLDER
-								  )
-else()
-	list(APPEND DEFS CMESH_DLL)
-	__add_real_target(cmesh dll SOURCE ${SRCS}
-								  LIB ${LIBS}
-								  DEF ${DEFS}
-								  INC ${INCS}
-								  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-								  SOURCE_FOLDER
-								  )
-endif()
+__add_platform_library(cmesh)
 
+if(CC_INSTALL_CMESH)
+	__install_directory_specif(${CMAKE_CURRENT_SOURCE_DIR}/ cmesh)
+endif()
