@@ -161,7 +161,7 @@ int main_test()
     return 1;
 }
 
-namespace mmesh
+namespace cmesh
 {
     trimesh::TriMesh* cxBooleanOperateMeshObj(trimesh::TriMesh* Mesh1, trimesh::TriMesh* Mesh2, cxBoolean_operation_type typeindex)
     {
@@ -209,7 +209,7 @@ namespace mmesh
 }
 
 #else
-namespace mmesh
+namespace cmesh
 {
     trimesh::TriMesh* cxBooleanOperateMeshObj(trimesh::TriMesh* Mesh1, trimesh::TriMesh* Mesh2, cxBoolean_operation_type typeindex)
     {

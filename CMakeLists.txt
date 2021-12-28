@@ -41,6 +41,9 @@ set(SRCS cmesh/interface.h
 		 cmesh/mesh/simplify.cpp
 		 cmesh/mesh/roof.h
 		 cmesh/mesh/roof.cpp
+		 cmesh/mesh/boolean.cpp
+		 cmesh/mesh/boolean.h
+
 		 )
 		
 set(INCS ${EIGEN_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
