@@ -8,6 +8,12 @@ if(NOT BOOST_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified BOOST_INCLUDE_DIRS")
 endif()
 
+if (MSVC)
+  add_definitions(/bigobj)
+else ()
+  add_definitions(-Wa,-mbig-obj)
+endif ()
+
 include(CGAL)
 
 __cgal_include_package(Straight_skeleton_2)
