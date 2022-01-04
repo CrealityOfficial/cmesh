@@ -10,8 +10,6 @@ endif()
 
 if (MSVC)
   add_definitions(/bigobj)
-else ()
-  add_definitions(-Wa,-mbig-obj)
 endif ()
 
 include(CGAL)

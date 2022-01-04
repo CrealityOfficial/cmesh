@@ -22,16 +22,16 @@ typedef boost::shared_ptr<Straight_skeleton> Straight_skeleton_ptr;
 
 namespace cmesh
 {
-    void seperate1423(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
+    void seperate1423(ClipperLibXYZ::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
     {
-        for (ClipperLib::PolyNode* node1 : polyTree->Childs)
+        for (ClipperLibXYZ::PolyNode* node1 : polyTree->Childs)
         {
-            std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
-            std::vector<ClipperLib::PolyNode*> node3;
-            for (ClipperLib::PolyNode* n : node2)
+            std::vector<ClipperLibXYZ::PolyNode*>& node2 = node1->Childs;
+            std::vector<ClipperLibXYZ::PolyNode*> node3;
+            for (ClipperLibXYZ::PolyNode* n : node2)
                 node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
-            std::vector<ClipperLib::PolyNode*> node4;
-            for (ClipperLib::PolyNode* n : node3)
+            std::vector<ClipperLibXYZ::PolyNode*> node4;
+            for (ClipperLibXYZ::PolyNode* n : node3)
                 node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
 
             PolyPair* pair1 = new PolyPair();
@@ -40,7 +40,7 @@ namespace cmesh
             pair1->inner.swap(node4);
             polyPairs.push_back(pair1);
 
-            for (ClipperLib::PolyNode* n : node2)
+            for (ClipperLibXYZ::PolyNode* n : node2)
             {
                 PolyPair* pair = new PolyPair();
                 pair->clockwise = true;
@@ -51,16 +51,16 @@ namespace cmesh
         }
     }
 
-    void seperate1234(ClipperLib::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
+    void seperate1234(ClipperLibXYZ::PolyTree* polyTree, std::vector<PolyPair*>& polyPairs)
     {
-        for (ClipperLib::PolyNode* node1 : polyTree->Childs)
+        for (ClipperLibXYZ::PolyNode* node1 : polyTree->Childs)
         {
-            std::vector<ClipperLib::PolyNode*>& node2 = node1->Childs;
-            std::vector<ClipperLib::PolyNode*> node3;
-            for (ClipperLib::PolyNode* n : node2)
+            std::vector<ClipperLibXYZ::PolyNode*>& node2 = node1->Childs;
+            std::vector<ClipperLibXYZ::PolyNode*> node3;
+            for (ClipperLibXYZ::PolyNode* n : node2)
                 node3.insert(node3.end(), n->Childs.begin(), n->Childs.end());
-            std::vector<ClipperLib::PolyNode*> node4;
-            for (ClipperLib::PolyNode* n : node3)
+            std::vector<ClipperLibXYZ::PolyNode*> node4;
+            for (ClipperLibXYZ::PolyNode* n : node3)
                 node4.insert(node4.end(), n->Childs.begin(), n->Childs.end());
 
             PolyPair* pair1 = new PolyPair();
@@ -69,7 +69,7 @@ namespace cmesh
             pair1->inner.swap(node2);
             polyPairs.push_back(pair1);
 
-            for (ClipperLib::PolyNode* n : node3)
+            for (ClipperLibXYZ::PolyNode* n : node3)
             {
                 PolyPair* pair = new PolyPair();
                 pair->clockwise = true;
@@ -80,14 +80,14 @@ namespace cmesh
         }
     }
 
-    void fill_polygon(Polygon_2& polygon, ClipperLib::Path* path, bool inverse)
+    void fill_polygon(Polygon_2& polygon, ClipperLibXYZ::Path* path, bool inverse)
     {
         size_t size = path->size();
         if (!inverse)
         {
             for (size_t i = 0; i < size; ++i)
             {
-                ClipperLib::IntPoint& p = path->at(i);
+                ClipperLibXYZ::IntPoint& p = path->at(i);
                 polygon.push_back(Point(INT2MM(p.X), INT2MM(p.Y)));
             }
         }
@@ -95,7 +95,7 @@ namespace cmesh
         {
             for (size_t i = 0; i < size; ++i)
             {
-                ClipperLib::IntPoint& p = path->at(size - 1 - i);
+                ClipperLibXYZ::IntPoint& p = path->at(size - 1 - i);
                 polygon.push_back(Point(INT2MM(p.X), INT2MM(p.Y)));
             }
         }
@@ -106,16 +106,16 @@ namespace cmesh
         bool inverse = pair->clockwise;
 
         Polygon_2& poly = input->outer_boundary();
-        ClipperLib::Path& path = pair->outer->Contour;
+        ClipperLibXYZ::Path& path = pair->outer->Contour;
         size_t size = path.size();
         if (size < 3 /*|| inverse*/)
             return;
 
         fill_polygon(input->outer_boundary(), &path, inverse);
 
-        for (ClipperLib::PolyNode* n : pair->inner)
+        for (ClipperLibXYZ::PolyNode* n : pair->inner)
         {
-            ClipperLib::Path& npath = n->Contour;
+            ClipperLibXYZ::Path& npath = n->Contour;
             size_t nsize = npath.size();
             if (nsize < 3)
                 return;
@@ -150,7 +150,7 @@ namespace cmesh
         return valid;
     }
 
-    void buildRoofs(ClipperLib::PolyTree* polyTree, std::vector<std::vector<trimesh::vec3>*>& patches, double roofHeight, double thickness)
+    void buildRoofs(ClipperLibXYZ::PolyTree* polyTree, std::vector<std::vector<trimesh::vec3>*>& patches, double roofHeight, double thickness)
     {
         std::vector<PolyPair*> pairs;
         seperate1423(polyTree, pairs);
@@ -180,16 +180,16 @@ namespace cmesh
         pairs.clear();
     }
 
-    ClipperLib::IntPoint cgal_to_point(const Point& point)
+    ClipperLibXYZ::IntPoint cgal_to_point(const Point& point)
     {
-        ClipperLib::IntPoint p;
-        p.X = (ClipperLib::cInt)(1000.0 * point.x());
-        p.Y = (ClipperLib::cInt)(1000.0 * point.y());
+        ClipperLibXYZ::IntPoint p;
+        p.X = (ClipperLibXYZ::cInt)(1000.0 * point.x());
+        p.Y = (ClipperLibXYZ::cInt)(1000.0 * point.y());
 
         return p;
     }
 
-    void traitSkeletonPoints(ClipperLib::PolyTree* roofPoint, Straight_skeleton_ptr skeleton)
+    void traitSkeletonPoints(ClipperLibXYZ::PolyTree* roofPoint, Straight_skeleton_ptr skeleton)
     {
         for (Vertex_const_iterator vit = skeleton->vertices_begin();
             vit != skeleton->vertices_end(); ++vit)
@@ -200,7 +200,7 @@ namespace cmesh
         }
     }
 
-    void traitSkeletonLine(ClipperLib::PolyTree* roofLine, Straight_skeleton_ptr skeleton)
+    void traitSkeletonLine(ClipperLibXYZ::PolyTree* roofLine, Straight_skeleton_ptr skeleton)
     {
         for (Halfedge_const_iterator hit = skeleton->halfedges_begin();
             hit != skeleton->halfedges_end(); ++hit)
@@ -212,7 +212,7 @@ namespace cmesh
         }
     }
 
-    void traitSkeletonFace(ClipperLib::Paths* roofFace, Straight_skeleton_ptr skeleton, bool clockwise = false)
+    void traitSkeletonFace(ClipperLibXYZ::Paths* roofFace, Straight_skeleton_ptr skeleton, bool clockwise = false)
     {
         size_t faceSize = skeleton->size_of_faces();
         size_t roofFase = roofFace->size();
@@ -223,14 +223,14 @@ namespace cmesh
         for (Face_const_iterator fit = skeleton->faces_begin();
             fit != skeleton->faces_end(); ++fit)
         {
-            ClipperLib::Path& path = roofFace->at(index);
+            ClipperLibXYZ::Path& path = roofFace->at(index);
             //if (index < roofFase + faceSize)
             {
                 Halfedge_const_handle he = fit->halfedge();
                 Halfedge_const_handle h = he;
                 do
                 {
-                    ClipperLib::IntPoint p = cgal_to_point(h->vertex()->point());
+                    ClipperLibXYZ::IntPoint p = cgal_to_point(h->vertex()->point());
                     if (h->vertex()->is_skeleton())
                     {
                         p.Z = 500;
@@ -249,8 +249,8 @@ namespace cmesh
         }
     }
 
-    void roofLine(ClipperLib::PolyTree* polyTree,
-        ClipperLib::PolyTree* roof, ClipperLib::PolyTree* roofPoint, ClipperLib::Paths* roofFace, bool onePoly)
+    void roofLine(ClipperLibXYZ::PolyTree* polyTree,
+        ClipperLibXYZ::PolyTree* roof, ClipperLibXYZ::PolyTree* roofPoint, ClipperLibXYZ::Paths* roofFace, bool onePoly)
     {
         std::vector<PolyPair*> pairs;
         if (onePoly)
@@ -265,7 +265,7 @@ namespace cmesh
             if (!test_simple_polygon(input))
                 continue;
 
-            ClipperLib::PolyTree opposite;
+            ClipperLibXYZ::PolyTree opposite;
             Straight_skeleton_ptr aSkeleton = CGAL::create_interior_straight_skeleton_2(input);
             if (aSkeleton)
             {
@@ -297,7 +297,7 @@ namespace cmesh
         pairs.clear();
     }
 
-    void traitSkeletonPoints(ClipperLib::Path* roofPoint, Straight_skeleton_ptr skeleton)
+    void traitSkeletonPoints(ClipperLibXYZ::Path* roofPoint, Straight_skeleton_ptr skeleton)
     {
         for (Vertex_const_iterator vit = skeleton->vertices_begin();
             vit != skeleton->vertices_end(); ++vit)
@@ -307,7 +307,7 @@ namespace cmesh
                 roofPoint->push_back(cgal_to_point(h->point()));
         }
     }
-    bool havePoint(const ClipperLib::Path* path, const ClipperLib::IntPoint& point)
+    bool havePoint(const ClipperLibXYZ::Path* path, const ClipperLibXYZ::IntPoint& point)
     {
         for (size_t i = 0; i < path->size(); i++)
         {
@@ -316,7 +316,7 @@ namespace cmesh
         }
         return false;
     }
-    bool havePoints(const ClipperLib::Path* path, const ClipperLib::IntPoint& p1, const ClipperLib::IntPoint& p2)
+    bool havePoints(const ClipperLibXYZ::Path* path, const ClipperLibXYZ::IntPoint& p1, const ClipperLibXYZ::IntPoint& p2)
     {
         if (path->size() < 2)
             return false;
@@ -328,7 +328,7 @@ namespace cmesh
         }
         return false;
     }
-    void traitSkeletonLine(ClipperLib::Path* roofline, ClipperLib::Path* roofPoint, Straight_skeleton_ptr skeleton)
+    void traitSkeletonLine(ClipperLibXYZ::Path* roofline, ClipperLibXYZ::Path* roofPoint, Straight_skeleton_ptr skeleton)
     {
         for (Vertex_const_iterator vit = skeleton->vertices_begin();
             vit != skeleton->vertices_end(); ++vit)
@@ -340,8 +340,8 @@ namespace cmesh
                 //if (h->is_inner_bisector() && h->opposite()->is_inner_bisector())
                 if (h->vertex()->is_skeleton() && h->opposite()->vertex()->is_skeleton())
                 {
-                    ClipperLib::IntPoint& p = cgal_to_point(h->vertex()->point());
-                    ClipperLib::IntPoint& po = cgal_to_point(h->opposite()->vertex()->point());
+                    ClipperLibXYZ::IntPoint& p = cgal_to_point(h->vertex()->point());
+                    ClipperLibXYZ::IntPoint& po = cgal_to_point(h->opposite()->vertex()->point());
                     if (havePoint(roofPoint, p) && havePoint(roofPoint, po))
                         if (!havePoints(roofline, p, po))
                         {
@@ -353,9 +353,9 @@ namespace cmesh
         }
     }
 
-    void skeletonPoints(ClipperLib::PolyTree* polyTree, ClipperLib::Path* roofLine)
+    void skeletonPoints(ClipperLibXYZ::PolyTree* polyTree, ClipperLibXYZ::Path* roofLine)
     {
-        ClipperLib::PolyTree roof;
+        ClipperLibXYZ::PolyTree roof;
         std::vector<PolyPair*> pairs;
         seperate1234(polyTree, pairs);
         for (PolyPair* pair : pairs)
@@ -364,11 +364,11 @@ namespace cmesh
             build_polygon_with_holes(&input, pair);
             if (!test_simple_polygon(input))
                 continue;
-            ClipperLib::PolyTree opposite;
+            ClipperLibXYZ::PolyTree opposite;
             Straight_skeleton_ptr aSkeleton = CGAL::create_interior_straight_skeleton_2(input);
             if (aSkeleton)
             {
-                ClipperLib::Path roofPoint;
+                ClipperLibXYZ::Path roofPoint;
                 traitSkeletonPoints(&roofPoint, aSkeleton);
                 if (roofLine)
                     traitSkeletonLine(roofLine, &roofPoint, aSkeleton);

@@ -5,7 +5,7 @@
 
 namespace cmesh
 {
-    CMESH_API enum  class cxBoolean_operation_type
+    enum  class cxBoolean_operation_type
     {
         CX_UNION,
         CX_INTERSECTION,
