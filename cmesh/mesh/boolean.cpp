@@ -1,6 +1,5 @@
 #include "boolean.h"
 
-#if defined(WIN32) && defined(USE_CGAL)
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
 #include <CGAL/Surface_mesh.h>
@@ -208,12 +207,4 @@ namespace cmesh
     }
 }
 
-#else
-namespace cmesh
-{
-    trimesh::TriMesh* cxBooleanOperateMeshObj(trimesh::TriMesh* Mesh1, trimesh::TriMesh* Mesh2, cxBoolean_operation_type typeindex)
-    {
-        return nullptr;
-    }
-}
-#endif // WIN32
+

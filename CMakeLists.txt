@@ -47,11 +47,11 @@ set(SRCS cmesh/interface.h
 		 cmesh/mesh/simplify.cpp
 		 cmesh/mesh/roof.h
 		 cmesh/mesh/roof.cpp
-		 cmesh/mesh/boolean.cpp
 		 cmesh/mesh/boolean.h
-
+		 cmesh/mesh/boolean.cpp
 		 )
 		
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 set(INCS ${EIGEN_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
 set(LIBS trimesh2 clipper)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED)
