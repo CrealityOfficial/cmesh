@@ -10,6 +10,7 @@ endif()
 
 if (MSVC)
   add_definitions(/bigobj)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif ()
 
 include(CGAL)
@@ -49,7 +50,7 @@ set(SRCS cmesh/interface.h
 		 cmesh/mesh/boolean.cpp
 		 )
 		
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+
 set(INCS ${EIGEN_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
 set(LIBS trimesh2 clipper)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED)
