@@ -340,8 +340,8 @@ namespace cmesh
                 //if (h->is_inner_bisector() && h->opposite()->is_inner_bisector())
                 if (h->vertex()->is_skeleton() && h->opposite()->vertex()->is_skeleton())
                 {
-                    ClipperLibXYZ::IntPoint& p = cgal_to_point(h->vertex()->point());
-                    ClipperLibXYZ::IntPoint& po = cgal_to_point(h->opposite()->vertex()->point());
+                   const ClipperLibXYZ::IntPoint& p = cgal_to_point(h->vertex()->point());
+                   const ClipperLibXYZ::IntPoint& po = cgal_to_point(h->opposite()->vertex()->point());
                     if (havePoint(roofPoint, p) && havePoint(roofPoint, po))
                         if (!havePoints(roofline, p, po))
                         {
