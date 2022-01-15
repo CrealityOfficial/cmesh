@@ -48,6 +48,12 @@ set(SRCS cmesh/interface.h
 		 cmesh/mesh/roof.cpp
 		 cmesh/mesh/boolean.h
 		 cmesh/mesh/boolean.cpp
+		 cmesh/mesh/meshgeneration.h
+		 cmesh/mesh/meshgeneration.cpp
+		 cmesh/mesh/meshwrapper.h
+		 cmesh/mesh/meshwrapper.cpp
+		 cmesh/mesh/meshmeshing.h
+		 cmesh/mesh/meshmeshing.cpp
 		 )
 		
 
