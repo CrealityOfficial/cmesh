@@ -3,6 +3,11 @@
 #include "cmesh/interface.h"
 #include "trimesh2/TriMesh.h"
 
+namespace ccglobal
+{
+	class Tracer;
+}
+
 namespace cmesh
 {
 	class CMESH_API MeshWrapper
@@ -11,7 +16,7 @@ namespace cmesh
 		MeshWrapper();
 		~MeshWrapper();
 		void initMesh(trimesh::TriMesh* mesh);
-		trimesh::TriMesh* fillHolesWrapper();
+		trimesh::TriMesh* fillHolesWrapper(ccglobal::Tracer* tracer);
 	protected:
 		trimesh::TriMesh* m_mesh;
 		void* m_impl;

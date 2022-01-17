@@ -3,11 +3,7 @@
 #include "meshgeneration.h"
 #include "meshmeshing.h"
 
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Polyhedron_3<Kernel>     Polyhedron;
-
+#include "ccglobal/tracer.h"
 
 namespace cmesh
 {
@@ -30,12 +26,19 @@ namespace cmesh
 		m_mesh = mesh;
 	}
 
-	trimesh::TriMesh* MeshWrapper::fillHolesWrapper()
+	trimesh::TriMesh* MeshWrapper::fillHolesWrapper(ccglobal::Tracer* tracer)
 	{
+		if (tracer)
+		{
+			tracer->progress(0.2f);
+		}
 		selfIntersections(m_mesh);
 
-		
-		deleteOutlier(m_mesh);
+		if (tracer)
+		{
+			tracer->progress(0.4f);
+		}
+		//deleteOutlier(m_mesh);
 
 		//remeshIsotropic(m_mesh);
 
@@ -51,9 +54,13 @@ namespace cmesh
 		//refineFair(m_mesh, (Polyhedron*)m_impl);
 		//isTriangulate(m_mesh);
 
-		holeFilling(m_mesh);
+		holeFilling(m_mesh, tracer);
 		//fillHoles(m_mesh, (Polyhedron*)m_impl);
 
+		if (tracer)
+		{
+			tracer->progress(1.0f);
+		}
 		return m_mesh;
 	}
 }

@@ -3,10 +3,10 @@
 //#include "cmesh/interface.h"
 #include "trimesh2/TriMesh.h"
 
-//#include <CGAL/Polyhedron_3.h>
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-//typedef CGAL::Polyhedron_3<Kernel>     Polyhedron;
+namespace ccglobal
+{
+	class Tracer;
+}
 
 namespace cmesh
 {
@@ -14,7 +14,7 @@ namespace cmesh
 	//void isTriangulate(trimesh::TriMesh* mesh);
 	void remeshIsotropic(trimesh::TriMesh* mesh);
 
-	void holeFilling(trimesh::TriMesh* mesh);
+	void holeFilling(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer);
 }
 
 #endif // MESH_MESHING_1605318972342_H

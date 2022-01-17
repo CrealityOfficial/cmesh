@@ -1,6 +1,8 @@
 #include "meshmeshing.h"
 #include "trimesh2/Vec.h"
 
+#include "ccglobal/tracer.h"
+
 #if 0
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polyhedron_3.h>
@@ -272,8 +274,12 @@ namespace cmesh {
         }
         return true;
     }
-    void holeFilling(trimesh::TriMesh* mesh)
+    void holeFilling(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer)
     {
+        if (tracer)
+        {
+            tracer->progress(0.2f);
+        }
         Mesh smesh;
         for (unsigned i = 0; i < mesh->vertices.size(); i++) {
             smesh.add_vertex(Point(mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z));
@@ -281,7 +287,10 @@ namespace cmesh {
         for (unsigned i = 0; i < mesh->faces.size(); i++) {
             smesh.add_face(CGAL::SM_Vertex_index(mesh->faces[i].x), CGAL::SM_Vertex_index(mesh->faces[i].y), CGAL::SM_Vertex_index(mesh->faces[i].z));
         }
-
+        if (tracer)
+        {
+            tracer->progress(0.4f);
+        }
         // Both of these must be positive in order to be considered
         double max_hole_diam = -1.0;
         int max_num_hole_edges = -1;
@@ -289,9 +298,17 @@ namespace cmesh {
         unsigned int nb_holes = 0;
         std::vector<halfedge_descriptor> border_cycles;
         // collect one halfedge per boundary cycle
-        //PMP::extract_boundary_cycles(smesh, std::back_inserter(border_cycles));
+        PMP::extract_boundary_cycles(smesh, std::back_inserter(border_cycles));
+
+        float countNums = border_cycles.size() ==0 ? 1: 1.0/border_cycles.size();
+        int count = 1;
         for (halfedge_descriptor h : border_cycles)
         {
+            if (tracer)
+            {
+                tracer->progress(countNums * count++);
+            }
+
             if (max_hole_diam > 0 && max_num_hole_edges > 0 &&
                 !is_small_hole(h, smesh, max_hole_diam, max_num_hole_edges))
                 continue;
@@ -310,7 +327,10 @@ namespace cmesh {
         mesh->vertices.clear();
         mesh->faces.clear();
         mesh->normals.clear();
-
+        if (tracer)
+        {
+            tracer->progress(0.8f);
+        }
         for (Point v : smesh.points())
         {
             mesh->vertices.push_back(trimesh::point(v.x(), v.y(), v.z()));
@@ -337,6 +357,9 @@ namespace cmesh {
                     mesh->faces.emplace_back(f);
             }
         }
-
+        if (tracer)
+        {
+            tracer->progress(1.0f);
+        }
     }
 }

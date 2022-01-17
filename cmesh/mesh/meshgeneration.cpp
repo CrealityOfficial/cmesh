@@ -20,8 +20,8 @@ typedef Polyhedron::Vertex_handle      Vertex_handle;
 typedef Polyhedron::Halfedge_around_facet_circulator Halfedge_facet_circulator;
 //Intersections
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Surface_mesh<K::Point_3>                      Mesh;
-typedef boost::graph_traits<Mesh>::face_descriptor          face_descriptor;
+typedef CGAL::Surface_mesh<K::Point_3>                      CMesh;
+typedef boost::graph_traits<CMesh>::face_descriptor          face_descriptor;
 namespace PMP = CGAL::Polygon_mesh_processing;
 
 namespace cmesh
@@ -117,7 +117,7 @@ namespace cmesh
 
     void selfIntersections(trimesh::TriMesh* mesh)
     {
-        Mesh cgalMesh;
+        CMesh cgalMesh;
         for (unsigned i = 0; i < mesh->vertices.size(); i++) {
             cgalMesh.add_vertex(K::Point_3(mesh->vertices[i].x, mesh->vertices[i].y, mesh->vertices[i].z));
             //vh->id = i;
@@ -167,13 +167,16 @@ namespace cmesh
 //        std::sort(delFace.begin(), delFace.end());
 //        delFace.erase(std::unique(delFace.begin(), delFace.end()), delFace.end());
 
-        std::vector<trimesh::TriMesh::Face> validFaces;
-        for (size_t i = 0; i < mesh->faces.size(); i++)
+        if (delFace.size()>0)
         {
-            if (!count(delFace.begin(), delFace.end(), i))
-                validFaces.push_back(mesh->faces.at(i));
+            std::vector<trimesh::TriMesh::Face> validFaces;
+            for (size_t i = 0; i < mesh->faces.size(); i++)
+            {
+                if (!count(delFace.begin(), delFace.end(), i))
+                    validFaces.push_back(mesh->faces.at(i));
+            }
+            mesh->faces.swap(validFaces);
         }
-        mesh->faces.swap(validFaces);
     }
 
 
