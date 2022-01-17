@@ -124,9 +124,6 @@ namespace cmesh
         }
 
         // triangles
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
         for (unsigned i = 0; i < mesh->faces.size(); i++) {
             cgalMesh.add_face(CGAL::SM_Vertex_index(mesh->faces[i].x), CGAL::SM_Vertex_index(mesh->faces[i].y), CGAL::SM_Vertex_index(mesh->faces[i].z));
             //fh->id = i;
@@ -136,13 +133,10 @@ namespace cmesh
             PMP::parameters::vertex_point_map(get(CGAL::vertex_point, cgalMesh)));
 
         std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
-        PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cgalMesh), cgalMesh, std::back_inserter(intersected_tris));
+        //PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cgalMesh), cgalMesh, std::back_inserter(intersected_tris));
         int num = intersected_tris.size();
 
         std::vector<int>delFace;
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
         for (int i = 0; i < intersected_tris.size(); ++i)
         {
             delFace.push_back(intersected_tris[i].first);
@@ -174,9 +168,6 @@ namespace cmesh
 //        delFace.erase(std::unique(delFace.begin(), delFace.end()), delFace.end());
 
         std::vector<trimesh::TriMesh::Face> validFaces;
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
         for (size_t i = 0; i < mesh->faces.size(); i++)
         {
             if (!count(delFace.begin(), delFace.end(), i))
@@ -194,9 +185,6 @@ namespace cmesh
         int nf = mesh->faces.size();
         std::vector<trimesh::TriMesh::Face> validFaces;
 
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
         for (int i = 0; i < nf; i++) {
             if (mesh->across_edge[i][0] != -1 || mesh->across_edge[i][1] != -1|| mesh->across_edge[i][2] != -1)  
             {

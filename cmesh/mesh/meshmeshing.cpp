@@ -289,7 +289,7 @@ namespace cmesh {
         unsigned int nb_holes = 0;
         std::vector<halfedge_descriptor> border_cycles;
         // collect one halfedge per boundary cycle
-        PMP::extract_boundary_cycles(smesh, std::back_inserter(border_cycles));
+        //PMP::extract_boundary_cycles(smesh, std::back_inserter(border_cycles));
         for (halfedge_descriptor h : border_cycles)
         {
             if (max_hole_diam > 0 && max_num_hole_edges > 0 &&
