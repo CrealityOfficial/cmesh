@@ -59,7 +59,7 @@ set(SRCS cmesh/interface.h
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
 set(LIBS trimesh2 clipper)
-set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED)
+set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
 
 __add_platform_library(cmesh)
 
