@@ -4,7 +4,6 @@
 #if 0
 
 #include "find_union_intersect.h"
-#ifdef USE_CGAL
 namespace UNION_FIND_FUNC
 {
 	
@@ -129,6 +128,4 @@ namespace UNION_FIND_FUNC
 		return 0;
 	}
 }
-#endif
-
 #endif

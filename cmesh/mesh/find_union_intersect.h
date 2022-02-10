@@ -6,7 +6,6 @@
 #include<string>
 #include<cstdlib>
 #include<vector>
-#ifdef USE_CGAL
 #include "compute_normals_sm.h"
 
 #if 0
@@ -43,7 +42,5 @@ namespace UNION_FIND_FUNC
 	int main();
 	//void Print_conComponents(Set forestSet[], char vertex[], int vNum);
 }
-
-#endif
 
 #endif
