@@ -1,4 +1,4 @@
-#include "boolean.h"
+#include "cmesh/mesh/boolean.h"
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include <CGAL/Polygon_mesh_processing/corefinement.h>
