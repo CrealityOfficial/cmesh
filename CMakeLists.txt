@@ -1,7 +1,7 @@
 __assert_target(trimesh2)
 
-__cc_find(Boost)
-__cc_find(Eigen)
+#__cc_find(Boost)
+#__cc_find(Eigen)
 __assert_target(boost_system)
 
 if(NOT EIGEN_INCLUDE_DIRS)
