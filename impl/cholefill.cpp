@@ -2,7 +2,7 @@
 
 namespace cmesh
 {
-    bool _holeFilling(CMesh& cmesh, ccglobal::Tracer* tracer)
+    bool _holeFilling(CMesh& cmesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
     {
         if (tracer)
         {
@@ -29,10 +29,21 @@ namespace cmesh
 
             std::vector<face_descriptor>  patch_facets;
             std::vector<vertex_descriptor> patch_vertices;
-            bool success = std::get<0>(PMP::triangulate_refine_and_fair_hole(cmesh,
-                h,
-                std::back_inserter(patch_facets),
-                std::back_inserter(patch_vertices)));
+            if (refine_and_fair_hole)
+            {
+
+                bool success = std::get<0>(PMP::triangulate_refine_and_fair_hole(cmesh,
+                    h,
+                    std::back_inserter(patch_facets),
+                    std::back_inserter(patch_vertices)));
+            }
+            else
+            {
+                PMP::triangulate_and_refine_hole(cmesh,
+                    h,
+                    std::back_inserter(patch_facets),
+                    std::back_inserter(patch_vertices));
+            }
         }
 
         if (tracer)

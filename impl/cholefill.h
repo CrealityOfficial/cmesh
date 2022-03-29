@@ -5,7 +5,7 @@
 
 namespace cmesh
 {
-	bool _holeFilling(CMesh& cmesh, ccglobal::Tracer* tracer);
+	bool _holeFilling(CMesh& cmesh, bool refine_and_fair_hole,ccglobal::Tracer* tracer);
 }
 
 

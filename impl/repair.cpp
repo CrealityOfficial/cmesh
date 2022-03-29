@@ -1,15 +1,321 @@
 #include "cmesh/mesh/repair.h"
 #include "cholefill.h"
+#include "tmeshutil.h"
+#include "cconversion.h"
+
+#include "mmesh/trimesh/trimeshutil.h"
+#include "mmesh/util/dumplicate.h"
 
 namespace cmesh
 {
-	void getErrorInfo(const RichMesh& mesh, ErrorInfo& info)
+	void getErrorInfo(RichMesh& mesh, ErrorInfo& info)
 	{
-
+		const CMesh& cmesh = mesh.impl().mesh;
+		//get edge
+		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
+		if (intersecting)
+		{
+			std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
+			PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
+			info.edgeNum = intersected_tris.size();
+		}
 	}
 
-	void repairHole(RichMesh& mesh, const HoleFillParam& param, ccglobal::Tracer* tracer)
+	void selfIntersections(CMesh& cmesh)
 	{
-		_holeFilling(mesh.impl().mesh, tracer);
+		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
+		if (!intersecting)
+		{
+			return;
+		}
+
+		std::string npath1 = "selfIntersections1.off";
+		CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
+
+		std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
+		PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
+		std::vector<int>delFace;
+		for (int i = 0; i < intersected_tris.size(); ++i)
+		{
+			delFace.push_back(intersected_tris[i].first);
+			delFace.push_back(intersected_tris[i].second);
+		}
+		std::sort(delFace.begin(), delFace.end());
+		delFace.erase(std::unique(delFace.begin(), delFace.end()), delFace.end());
+
+		CMesh cmeshnew;
+		for (Point v : cmesh.points())
+		{
+			cmeshnew.add_vertex(v);
+		}
+		for (CMesh::Face_index face_index : cmesh.faces())
+		{
+			CGAL::Vertex_around_face_circulator<CMesh> vcirc(cmesh.halfedge(face_index), cmesh), done(vcirc);
+
+			if (delFace.end() == std::find(delFace.begin(), delFace.end(), face_index))
+			{
+				int f[3];
+				int index = 0;
+				do
+				{
+					f[index] = (*vcirc).idx();
+					if (f[index] < 0)
+					{
+						break;
+					}
+					index += 1;
+				} while (++vcirc != done && index < 3);
+
+				cmeshnew.add_face(CGAL::SM_Vertex_index(f[0]), CGAL::SM_Vertex_index(f[1]), CGAL::SM_Vertex_index(f[2]));
+			}
+		}
+		cmesh = cmeshnew;
+
+		npath1 = "selfIntersections2.off";
+		CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
+	}
+
+	void removeNorVector(trimesh::TriMesh* mesh)
+	{
+		if (!mesh)
+		{
+			return;
+		}
+
+		int nf = mesh->faces.size();
+
+		std::vector<char> isIsolated(mesh->vertices.size(), 0);
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < nf; i++) {
+			const int& f1 = mesh->faces[i].x;
+			const int& f2 = mesh->faces[i].y;
+			const int& f3 = mesh->faces[i].z;
+			if (f1 != f2 && f1 != f3 && f2 != f3)
+			{
+				isIsolated[mesh->faces[i].x] = 1;
+				isIsolated[mesh->faces[i].y] = 1;
+				isIsolated[mesh->faces[i].z] = 1;
+			}
+		}
+
+		std::vector<trimesh::point> validVertices;
+		std::vector<int> V2newV(mesh->vertices.size(), 0);
+		for (int i = 0; i < mesh->vertices.size(); i++)
+		{
+			if (isIsolated[i] == 0)
+			{
+				V2newV[i] = -1;
+			}
+			else
+			{
+				validVertices.push_back(mesh->vertices[i]);
+				V2newV[i] = validVertices.size() - 1;
+			}
+		}
+
+		//mesh->need_neighbors();
+		//mesh->neighbors;
+
+		std::vector<trimesh::TriMesh::Face> validFaces;
+		for (int i = 0; i < nf; i++) {
+			if (V2newV[mesh->faces[i].x] != -1
+				&& V2newV[mesh->faces[i].y] != -1
+				&& V2newV[mesh->faces[i].z] != -1)
+			{
+				validFaces.push_back(trimesh::TriMesh::Face(V2newV[mesh->faces[i].x]
+					, V2newV[mesh->faces[i].y]
+					, V2newV[mesh->faces[i].z]));
+			}
+		}
+		mesh->faces.swap(validFaces);
+		mesh->vertices.swap(validVertices);
+	}
+
+	void splitTmesh2Cmesh(trimesh::TriMesh* mesh, std::vector<CMesh>& outMeshes, ccglobal::Tracer* tracer)
+	{
+		//split step1:
+		std::vector<trimesh::TriMesh*> outTMeshes;
+		spiltModel(mesh, outTMeshes, tracer);
+
+		//split step2:
+		for (size_t i = 0; i < outTMeshes.size(); i++)
+		{
+			CMesh newMesh1;
+			std::vector<CMesh> _outMeshes;
+			removeNorVector(outTMeshes[i]);
+			_convertT2C(*outTMeshes[i], newMesh1);
+
+			selfIntersections(newMesh1);
+
+			std::vector<std::vector<vertex_descriptor> > duplicated_vertices;
+			std::size_t new_vertices_nb = PMP::duplicate_non_manifold_vertices(newMesh1,
+				NP::output_iterator(
+					std::back_inserter(duplicated_vertices)));
+
+			CGAL::Polygon_mesh_processing::split_connected_components(newMesh1, _outMeshes);
+
+			outMeshes.insert(outMeshes.end(), _outMeshes.begin(), _outMeshes.end());
+		}
+	}
+
+
+	void repairHole(RichMesh& mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	{
+		CMesh& cmesh = mesh.impl().mesh;
+		_holeFilling(cmesh, refine_and_fair_hole, tracer);
+	}
+
+	void splitByOrientedAndHoleFill(std::vector<CMesh>& outMeshes
+		, std::vector<CMesh>& coutward_oriented
+		, std::vector<CMesh>& cinside_oriented
+		, bool refine_and_fair_hole
+		, ccglobal::Tracer* tracer)
+	{
+		for (int i = 0; i < outMeshes.size(); i++)
+		{
+			CMesh& newMesh = outMeshes[i];
+
+			if (!CGAL::is_closed(newMesh))
+			{
+				try {
+
+					_holeFilling(newMesh, refine_and_fair_hole, tracer);
+
+				}
+				catch (std::exception& e)
+				{
+					std::cerr << e.what();
+				}
+			}
+
+			//CGAL::Polygon_mesh_processing::orient(newMesh);
+			try {
+				if (CGAL::is_closed(newMesh))
+				{
+					if (CGAL::Polygon_mesh_processing::is_outward_oriented(newMesh))
+					{
+						//CGAL::Polygon_mesh_processing::orient(newMesh);
+						coutward_oriented.push_back(newMesh);
+					}
+					else
+					{
+						CGAL::Polygon_mesh_processing::reverse_face_orientations(newMesh);
+						//CGAL::Polygon_mesh_processing::orient(newMesh);
+						cinside_oriented.push_back(newMesh);
+					}
+				}
+			}
+			catch (std::exception& e)
+			{
+				std::cerr << e.what();
+			}
+
+		}
+	}
+
+	void orientedDetect(CMesh& cmesh, ccglobal::Tracer* tracer)
+	{
+		try {
+			if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+			{
+				CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
+			}
+		}
+		catch (std::exception& e)
+		{
+			std::cerr << e.what();
+		}
+	}
+
+	void HoleFill(CMesh& cmesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	{
+		if (!CGAL::is_closed(cmesh))
+		{
+			try {
+				_holeFilling(cmesh, refine_and_fair_hole, tracer);
+			}
+			catch (std::exception& e)
+			{
+				std::cerr << e.what();
+			}
+		}
+	}
+
+	void unionByOriented(std::vector<trimesh::TriMesh*>& meshes, std::vector<CMesh>& coutward_oriented, bool isOutwardoriented, ccglobal::Tracer* tracer)
+	{
+		//CMesh coutward_union;
+		//unionByBoolean(coutward_oriented, coutward_union, tracer);
+
+		std::vector<CMesh> coutward_unions;
+		//unionByBooleanThread(coutward_oriented, coutward_unions, tracer);
+		coutward_unions = coutward_oriented;
+
+		for (size_t i = 0; i < coutward_unions.size(); i++)
+		{
+			CMesh& coutward_union = coutward_unions[i];
+			orientedDetect(coutward_union, tracer);
+
+			if (!isOutwardoriented)
+			{
+				CGAL::Polygon_mesh_processing::reverse_face_orientations(coutward_union);
+			}
+			trimesh::TriMesh* mergedMeshOutward = new trimesh::TriMesh();
+			_convertC2T(coutward_union, *mergedMeshOutward);
+			meshes.push_back(mergedMeshOutward);
+		}
+	}
+
+
+	void repairMenu(RichMesh& meshInput, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	{
+		trimesh::TriMesh* mesh = meshInput.generateTrimesh();
+
+		std::vector<CMesh> outMeshes;
+		splitTmesh2Cmesh(mesh, outMeshes, tracer);
+		if (outMeshes.size() == 0)
+			return;
+
+		CMesh cmesh;//output
+		if (outMeshes.size() > 1)
+		{
+			std::vector<CMesh> coutward_oriented;
+			std::vector<CMesh> cinside_oriented;
+			splitByOrientedAndHoleFill(outMeshes, coutward_oriented, cinside_oriented, refine_and_fair_hole,tracer);
+			std::vector<trimesh::TriMesh*> meshes;
+			if (coutward_oriented.size() > 0) {
+				unionByOriented(meshes, coutward_oriented, true, tracer);
+				meshes.back()->write("coutward_oriented.stl");
+			}
+			if (cinside_oriented.size() > 0) {
+				unionByOriented(meshes, cinside_oriented, false, tracer);
+				meshes.back()->write("cinside_oriented.stl");
+			}
+
+			//trimesh::TriMesh* mergedMesh = new trimesh::TriMesh();
+			mesh->clear();
+			mmesh::mergeTriMesh(mesh, meshes);
+
+			//_convertT2C(*mergedMesh, cmesh);		
+			//_convertC2T(cmesh, *mesh);
+
+			for (size_t i = 0; i < meshes.size(); i++)
+			{
+				delete meshes[i];
+			}
+			meshes.clear();
+			//delete mergedMesh;
+		}
+		else
+		{
+			CMesh& cmesh = outMeshes.front();
+			//_convertT2C(outMeshes.front(),cmesh);
+			HoleFill(cmesh, refine_and_fair_hole,tracer);
+			orientedDetect(cmesh, tracer);
+			_convertC2T(cmesh, *mesh);
+		}
+
+		meshInput.initFromTriMesh(mesh);
 	}
 }

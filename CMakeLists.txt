@@ -34,12 +34,14 @@ set(SRCS include/cmesh/interface.h
 		 impl/repair.cpp
 		 impl/cholefill.h
 		 impl/cholefill.cpp
+		 impl/tmeshutil.h
+		 impl/tmeshutil.cpp
 		 )
 		
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS trimesh2 clipper boost_system)
+set(LIBS trimesh2 clipper boost_system mmesh)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
 
 __add_platform_library(cmesh)

@@ -27,6 +27,8 @@
 #include <CGAL/Polygon_mesh_processing/polygon_soup_to_polygon_mesh.h>
 #include <CGAL/Polygon_mesh_processing/orient_polygon_soup_extension.h>
 
+#include <CGAL/Polygon_mesh_processing/self_intersections.h>
+
 typedef CGAL::Exact_predicates_inexact_constructions_kernel   K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel   Kernel;
 typedef Kernel::Point_3                                       Point;
