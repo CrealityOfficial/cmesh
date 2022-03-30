@@ -10,8 +10,15 @@ namespace cmesh
 {
 	void getErrorInfo(RichMesh& mesh, ErrorInfo& info)
 	{
-		const CMesh& cmesh = mesh.impl().mesh;
-		//get edge
+	}
+
+	void getErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info)
+	{
+		CMesh cmesh;
+		_convertT2C(*mesh, cmesh);
+
+		int edge = halfedges(cmesh).size();
+
 		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
 		if (intersecting)
 		{
@@ -147,16 +154,18 @@ namespace cmesh
 			removeNorVector(outTMeshes[i]);
 			_convertT2C(*outTMeshes[i], newMesh1);
 
-			selfIntersections(newMesh1);
+			//std::vector<std::vector<vertex_descriptor> > duplicated_vertices;
+			//std::size_t new_vertices_nb = PMP::duplicate_non_manifold_vertices(newMesh1,
+			//	NP::output_iterator(
+			//		std::back_inserter(duplicated_vertices)));
 
-			std::vector<std::vector<vertex_descriptor> > duplicated_vertices;
-			std::size_t new_vertices_nb = PMP::duplicate_non_manifold_vertices(newMesh1,
-				NP::output_iterator(
-					std::back_inserter(duplicated_vertices)));
+			//CGAL::Polygon_mesh_processing::split_connected_components(newMesh1, _outMeshes);
 
-			CGAL::Polygon_mesh_processing::split_connected_components(newMesh1, _outMeshes);
+			//selfIntersections(newMesh1);
 
-			outMeshes.insert(outMeshes.end(), _outMeshes.begin(), _outMeshes.end());
+			//outMeshes.insert(outMeshes.end(), _outMeshes.begin(), _outMeshes.end());
+
+			outMeshes.push_back(newMesh1);
 		}
 	}
 
@@ -194,17 +203,17 @@ namespace cmesh
 			try {
 				if (CGAL::is_closed(newMesh))
 				{
-					if (CGAL::Polygon_mesh_processing::is_outward_oriented(newMesh))
-					{
-						//CGAL::Polygon_mesh_processing::orient(newMesh);
-						coutward_oriented.push_back(newMesh);
-					}
-					else
-					{
-						CGAL::Polygon_mesh_processing::reverse_face_orientations(newMesh);
-						//CGAL::Polygon_mesh_processing::orient(newMesh);
-						cinside_oriented.push_back(newMesh);
-					}
+					CGAL::Polygon_mesh_processing::orient(newMesh);
+				}
+
+				if (CGAL::Polygon_mesh_processing::is_outward_oriented(newMesh))
+				{
+					coutward_oriented.push_back(newMesh);
+				}
+				else
+				{
+					CGAL::Polygon_mesh_processing::reverse_face_orientations(newMesh);
+					cinside_oriented.push_back(newMesh);
 				}
 			}
 			catch (std::exception& e)
@@ -267,10 +276,19 @@ namespace cmesh
 		}
 	}
 
-
 	void repairMenu(RichMesh& meshInput, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	{}
+
+	void repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
 	{
-		trimesh::TriMesh* mesh = meshInput.generateTrimesh();
+		//if (CGAL::is_closed(meshInput.impl().mesh))
+		//{
+		//	CGAL::Polygon_mesh_processing::orient(meshInput.impl().mesh);
+		//}
+
+		//orientedDetect(meshInput.impl().mesh, tracer);
+
+		//trimesh::TriMesh* mesh = meshInput.generateTrimesh();
 
 		std::vector<CMesh> outMeshes;
 		splitTmesh2Cmesh(mesh, outMeshes, tracer);
@@ -286,26 +304,22 @@ namespace cmesh
 			std::vector<trimesh::TriMesh*> meshes;
 			if (coutward_oriented.size() > 0) {
 				unionByOriented(meshes, coutward_oriented, true, tracer);
-				meshes.back()->write("coutward_oriented.stl");
 			}
 			if (cinside_oriented.size() > 0) {
-				unionByOriented(meshes, cinside_oriented, false, tracer);
-				meshes.back()->write("cinside_oriented.stl");
+				if (coutward_oriented.size() == 0)
+					unionByOriented(meshes, cinside_oriented, true, tracer);
+				else
+					unionByOriented(meshes, cinside_oriented, false, tracer);
 			}
 
-			//trimesh::TriMesh* mergedMesh = new trimesh::TriMesh();
 			mesh->clear();
 			mmesh::mergeTriMesh(mesh, meshes);
-
-			//_convertT2C(*mergedMesh, cmesh);		
-			//_convertC2T(cmesh, *mesh);
 
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
 				delete meshes[i];
 			}
 			meshes.clear();
-			//delete mergedMesh;
 		}
 		else
 		{
@@ -315,7 +329,5 @@ namespace cmesh
 			orientedDetect(cmesh, tracer);
 			_convertC2T(cmesh, *mesh);
 		}
-
-		meshInput.initFromTriMesh(mesh);
 	}
 }
