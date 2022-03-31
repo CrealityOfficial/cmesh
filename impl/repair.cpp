@@ -14,18 +14,49 @@ namespace cmesh
 
 	void getErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info)
 	{
+		info.edgeNum = 0;
+		info.normalNum = 0;
+		info.holeNum = 0;
+		info.intersectNum = 0;
+
 		CMesh cmesh;
 		_convertT2C(*mesh, cmesh);
 
-		int edge = halfedges(cmesh).size();
+		int normalNum = 0;
+		for (halfedge_descriptor h : halfedges(cmesh))
+		{
+			if (is_border(h, cmesh))
+			{
+				info.edgeNum++;
+			}
+			else if (is_isolated_triangle(h, cmesh))
+			{
+				normalNum++;
+			}
+		}
+		if (normalNum==0 && CGAL::is_closed(cmesh))
+		{
+			if (!PMP::is_outward_oriented(cmesh))
+				info.normalNum = cmesh.faces().size();
+		}
+		else
+			info.normalNum = normalNum / 3; 
+
+		std::vector<halfedge_descriptor> border_cycles;
+		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
+		for (halfedge_descriptor h : border_cycles)
+		{
+			info.holeNum++;
+		}
 
 		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
+		std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
 		if (intersecting)
 		{
-			std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
 			PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
-			info.edgeNum = intersected_tris.size();
 		}
+		info.intersectNum = intersected_tris.size();
+
 	}
 
 	void selfIntersections(CMesh& cmesh)
@@ -36,8 +67,8 @@ namespace cmesh
 			return;
 		}
 
-		std::string npath1 = "selfIntersections1.off";
-		CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
+		//std::string npath1 = "selfIntersections1.off";
+		//CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
 
 		std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
 		PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
@@ -78,8 +109,8 @@ namespace cmesh
 		}
 		cmesh = cmeshnew;
 
-		npath1 = "selfIntersections2.off";
-		CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
+		//npath1 = "selfIntersections2.off";
+		//CGAL::IO::write_polygon_mesh(npath1, cmesh, CGAL::parameters::stream_precision(17));
 	}
 
 	void removeNorVector(trimesh::TriMesh* mesh)

@@ -7,8 +7,10 @@ namespace cmesh
 {
 	struct ErrorInfo
 	{
-		int edgeNum;
-		int normalNum;
+		int edgeNum;      //缺陷边
+		int normalNum;    //缺陷的法线
+		int holeNum;      //孔洞个数
+		int intersectNum; //非流面
 	};
 
 	CMESH_API void getErrorInfo(RichMesh& mesh, ErrorInfo& info);
