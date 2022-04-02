@@ -49,6 +49,7 @@ namespace cmesh
 			info.holeNum++;
 		}
 
+#if 0  //检测影响加载时间
 		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
 		std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
 		if (intersecting)
@@ -56,7 +57,7 @@ namespace cmesh
 			PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
 		}
 		info.intersectNum = intersected_tris.size();
-
+#endif
 	}
 
 	void selfIntersections(CMesh& cmesh)
@@ -310,7 +311,7 @@ namespace cmesh
 	void repairMenu(RichMesh& meshInput, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
 	{}
 
-	void repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
 	{
 		//if (CGAL::is_closed(meshInput.impl().mesh))
 		//{
@@ -324,7 +325,9 @@ namespace cmesh
 		std::vector<CMesh> outMeshes;
 		splitTmesh2Cmesh(mesh, outMeshes, tracer);
 		if (outMeshes.size() == 0)
-			return;
+			return nullptr;
+
+		trimesh::TriMesh* newMesh = new trimesh::TriMesh();
 
 		CMesh cmesh;//output
 		if (outMeshes.size() > 1)
@@ -343,8 +346,8 @@ namespace cmesh
 					unionByOriented(meshes, cinside_oriented, false, tracer);
 			}
 
-			mesh->clear();
-			mmesh::mergeTriMesh(mesh, meshes);
+			//newMesh->clear();
+			mmesh::mergeTriMesh(newMesh, meshes);
 
 			for (size_t i = 0; i < meshes.size(); i++)
 			{
@@ -358,7 +361,10 @@ namespace cmesh
 			//_convertT2C(outMeshes.front(),cmesh);
 			HoleFill(cmesh, refine_and_fair_hole,tracer);
 			orientedDetect(cmesh, tracer);
-			_convertC2T(cmesh, *mesh);
+			_convertC2T(cmesh, *newMesh);
 		}
+
+		newMesh->need_normals();
+		return newMesh;
 	}
 }
