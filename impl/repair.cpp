@@ -179,8 +179,14 @@ namespace cmesh
 		spiltModel(mesh, outTMeshes, tracer);
 
 		//split step2:
+		float countNums = outTMeshes.size() == 0 ? 1 : 1.0 / outTMeshes.size();
+		int count = 1;
 		for (size_t i = 0; i < outTMeshes.size(); i++)
 		{
+			if (tracer)
+			{
+				tracer->progress(countNums * count++);
+			}
 			CMesh newMesh1;
 			std::vector<CMesh> _outMeshes;
 			removeNorVector(outTMeshes[i]);
@@ -214,8 +220,15 @@ namespace cmesh
 		, bool refine_and_fair_hole
 		, ccglobal::Tracer* tracer)
 	{
+		float countNums = outMeshes.size() == 0 ? 1 : 1.0 / outMeshes.size();
+		int count = 1;
 		for (int i = 0; i < outMeshes.size(); i++)
 		{
+			if (tracer)
+			{
+				tracer->progress(countNums * count++);
+			}
+
 			CMesh& newMesh = outMeshes[i];
 
 			if (!CGAL::is_closed(newMesh))
@@ -293,8 +306,15 @@ namespace cmesh
 		//unionByBooleanThread(coutward_oriented, coutward_unions, tracer);
 		coutward_unions = coutward_oriented;
 
+		float countNums = coutward_unions.size() == 0 ? 1 : 1.0 / coutward_unions.size();
+		int count = 1;
+
 		for (size_t i = 0; i < coutward_unions.size(); i++)
 		{
+			if (tracer)
+			{
+				tracer->progress(countNums * count++);
+			}
 			CMesh& coutward_union = coutward_unions[i];
 			orientedDetect(coutward_union, tracer);
 
@@ -322,10 +342,20 @@ namespace cmesh
 
 		//trimesh::TriMesh* mesh = meshInput.generateTrimesh();
 
+		if (tracer)
+		{
+			tracer->progress(0.2f);
+		}
+
 		std::vector<CMesh> outMeshes;
 		splitTmesh2Cmesh(mesh, outMeshes, tracer);
 		if (outMeshes.size() == 0)
 			return nullptr;
+
+		if (tracer)
+		{
+			tracer->progress(0.4f);
+		}
 
 		trimesh::TriMesh* newMesh = new trimesh::TriMesh();
 
@@ -335,6 +365,12 @@ namespace cmesh
 			std::vector<CMesh> coutward_oriented;
 			std::vector<CMesh> cinside_oriented;
 			splitByOrientedAndHoleFill(outMeshes, coutward_oriented, cinside_oriented, refine_and_fair_hole,tracer);
+
+			if (tracer)
+			{
+				tracer->progress(0.6f);
+			}
+
 			std::vector<trimesh::TriMesh*> meshes;
 			if (coutward_oriented.size() > 0) {
 				unionByOriented(meshes, coutward_oriented, true, tracer);
@@ -344,6 +380,11 @@ namespace cmesh
 					unionByOriented(meshes, cinside_oriented, true, tracer);
 				else
 					unionByOriented(meshes, cinside_oriented, false, tracer);
+			}
+
+			if (tracer)
+			{
+				tracer->progress(0.8f);
 			}
 
 			//newMesh->clear();
@@ -362,6 +403,11 @@ namespace cmesh
 			HoleFill(cmesh, refine_and_fair_hole,tracer);
 			orientedDetect(cmesh, tracer);
 			_convertC2T(cmesh, *newMesh);
+		}
+
+		if (tracer)
+		{
+			tracer->progress(1.0f);
 		}
 
 		newMesh->need_normals();
