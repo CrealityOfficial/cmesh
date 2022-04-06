@@ -13,7 +13,7 @@ namespace cmesh
 		int intersectNum; //·ÇÁ÷Ãæ
 	};
 
-	CMESH_API void getErrorInfo(RichMesh& mesh, ErrorInfo& info);
+	CMESH_API void getErrorInfoRich(RichMesh& mesh, ErrorInfo& info);
 
 	CMESH_API void getErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info);
 
@@ -27,7 +27,7 @@ namespace cmesh
 
 
 
-	CMESH_API void repairMenu(RichMesh& mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer);
+	CMESH_API void repairMenuRich(RichMesh& mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer);
 
 	CMESH_API trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer);
 }

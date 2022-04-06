@@ -8,7 +8,7 @@
 
 namespace cmesh
 {
-	void getErrorInfo(RichMesh& mesh, ErrorInfo& info)
+	void getErrorInfoRich(RichMesh& mesh, ErrorInfo& info)
 	{
 	}
 
@@ -328,8 +328,9 @@ namespace cmesh
 		}
 	}
 
-	void repairMenu(RichMesh& meshInput, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
-	{}
+	void repairMenuRich(RichMesh& meshInput, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+	{
+	}
 
 	trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
 	{
