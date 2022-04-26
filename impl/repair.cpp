@@ -214,6 +214,38 @@ namespace cmesh
 		_holeFilling(cmesh, refine_and_fair_hole, tracer);
 	}
 
+	bool checkFill(std::vector<CMesh>& outMeshes, CMesh newMesh, int index, ccglobal::Tracer* tracer)
+	{
+		float countNums = outMeshes.size() == 0 ? 1 : 1.0 / outMeshes.size();
+		int count = 1;
+		for (int i = 0; i < outMeshes.size(); i++)
+		{
+			if (tracer)
+			{
+				tracer->progress(countNums * count++);
+			}
+
+			if (index == i)
+			{
+				if (CGAL::Polygon_mesh_processing::does_self_intersect(newMesh)
+					&& !CGAL::Polygon_mesh_processing::does_self_intersect(outMeshes[1]))
+					return false;
+				continue;
+			}
+
+			std::vector<std::vector<Point>> out;
+			if (!CGAL::Polygon_mesh_processing::does_self_intersect(newMesh)
+				&& !CGAL::Polygon_mesh_processing::does_self_intersect(outMeshes[1]))
+				CGAL::Polygon_mesh_processing::surface_intersection(newMesh, outMeshes[1], std::back_inserter(out));
+
+			if (out.size() > 0)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	void splitByOrientedAndHoleFill(std::vector<CMesh>& outMeshes
 		, std::vector<CMesh>& coutward_oriented
 		, std::vector<CMesh>& cinside_oriented
@@ -229,7 +261,7 @@ namespace cmesh
 				tracer->progress(countNums * count++);
 			}
 
-			CMesh& newMesh = outMeshes[i];
+			CMesh newMesh = outMeshes[i];
 
 			if (!CGAL::is_closed(newMesh))
 			{
@@ -244,6 +276,8 @@ namespace cmesh
 				}
 			}
 
+			bool result = checkFill(outMeshes, newMesh, i, tracer);
+
 			//CGAL::Polygon_mesh_processing::orient(newMesh);
 			try {
 				if (CGAL::is_closed(newMesh))
@@ -253,12 +287,26 @@ namespace cmesh
 
 				if (CGAL::Polygon_mesh_processing::is_outward_oriented(newMesh))
 				{
-					coutward_oriented.push_back(newMesh);
+					//CGAL::Polygon_mesh_processing::orient(newMesh);
+					if (!result)
+					{
+						coutward_oriented.push_back(outMeshes[i]);
+					}
+					else
+						coutward_oriented.push_back(newMesh);
 				}
 				else
 				{
-					CGAL::Polygon_mesh_processing::reverse_face_orientations(newMesh);
-					cinside_oriented.push_back(newMesh);
+					if (!result)
+					{
+						coutward_oriented.push_back(outMeshes[i]);
+					}
+					else
+					{
+						CGAL::Polygon_mesh_processing::reverse_face_orientations(newMesh);
+						//CGAL::Polygon_mesh_processing::orient(newMesh);
+						cinside_oriented.push_back(newMesh);
+					}
 				}
 			}
 			catch (std::exception& e)
@@ -272,7 +320,7 @@ namespace cmesh
 	void orientedDetect(CMesh& cmesh, ccglobal::Tracer* tracer)
 	{
 		try {
-			if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+			if (CGAL::is_closed(cmesh)&& !CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
 			{
 				CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
 			}
