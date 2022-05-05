@@ -214,10 +214,20 @@ namespace cmesh
 		_holeFilling(cmesh, refine_and_fair_hole, tracer);
 	}
 
-	bool checkFill(std::vector<CMesh>& outMeshes, CMesh newMesh, int index, ccglobal::Tracer* tracer)
+	void checkoutSelfIntersect(std::vector<CMesh>& outMeshes, std::vector<bool>& outMeshesSelfIntersect)
+	{
+		for (int i = 0; i < outMeshes.size(); i++)
+		{
+			outMeshesSelfIntersect[i]= CGAL::Polygon_mesh_processing::does_self_intersect(outMeshes[i]);
+		}
+	}
+
+	bool checkFill(std::vector<CMesh>& outMeshes, std::vector<bool>& outMeshesSelfIntersect,CMesh& newMesh, int index, ccglobal::Tracer* tracer)
 	{
 		float countNums = outMeshes.size() == 0 ? 1 : 1.0 / outMeshes.size();
 		int count = 1;
+
+		bool newMeshSelfIntersect = CGAL::Polygon_mesh_processing::does_self_intersect(newMesh);
 		for (int i = 0; i < outMeshes.size(); i++)
 		{
 			if (tracer)
@@ -227,16 +237,14 @@ namespace cmesh
 
 			if (index == i)
 			{
-				if (CGAL::Polygon_mesh_processing::does_self_intersect(newMesh)
-					&& !CGAL::Polygon_mesh_processing::does_self_intersect(outMeshes[1]))
+				if (newMeshSelfIntersect && !outMeshesSelfIntersect[i])
 					return false;
 				continue;
 			}
 
 			std::vector<std::vector<Point>> out;
-			if (!CGAL::Polygon_mesh_processing::does_self_intersect(newMesh)
-				&& !CGAL::Polygon_mesh_processing::does_self_intersect(outMeshes[1]))
-				CGAL::Polygon_mesh_processing::surface_intersection(newMesh, outMeshes[1], std::back_inserter(out));
+			//if (!newMeshSelfIntersect && !outMeshesSelfIntersect[i])
+				CGAL::Polygon_mesh_processing::surface_intersection(newMesh, outMeshes[i], std::back_inserter(out));
 
 			if (out.size() > 0)
 			{
@@ -254,6 +262,9 @@ namespace cmesh
 	{
 		float countNums = outMeshes.size() == 0 ? 1 : 1.0 / outMeshes.size();
 		int count = 1;
+
+		std::vector<bool> outMeshesSelfIntersect(outMeshes.size(), false);
+		checkoutSelfIntersect(outMeshes, outMeshesSelfIntersect);
 		for (int i = 0; i < outMeshes.size(); i++)
 		{
 			if (tracer)
@@ -261,7 +272,8 @@ namespace cmesh
 				tracer->progress(countNums * count++);
 			}
 
-			CMesh newMesh = outMeshes[i];
+			//CMesh newMesh = outMeshes[i];
+			CMesh& newMesh = outMeshes[i];
 
 			if (!CGAL::is_closed(newMesh))
 			{
@@ -276,7 +288,7 @@ namespace cmesh
 				}
 			}
 
-			bool result = checkFill(outMeshes, newMesh, i, tracer);
+			bool result = true; //checkFill(outMeshes,outMeshesSelfIntersect, newMesh, i, tracer);
 
 			//CGAL::Polygon_mesh_processing::orient(newMesh);
 			try {
