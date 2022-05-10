@@ -89,7 +89,7 @@ namespace cmesh
 			CMesh newMesh1;
 			std::vector<CMesh> _outMeshes;
 			removeNorVector2(outTMeshes[i]);
-			_convertT2C(*outTMeshes[i], newMesh1);
+			_convertT2C(*outTMeshes[i], newMesh1,true);
 
 			outMeshes.push_back(newMesh1);
 		}
@@ -351,7 +351,7 @@ namespace cmesh
 		meshes.clear();
 
 		CMesh cmeshA;
-		_convertT2C(*newMesh, cmeshA);
+		_convertT2C(*newMesh, cmeshA,true);
 		if (newMesh)
 		{
 			delete newMesh;

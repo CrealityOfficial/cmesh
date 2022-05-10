@@ -38,8 +38,15 @@ namespace cmesh
 		}
 		if (normalNum==0 && CGAL::is_closed(cmesh))
 		{
-			if (!PMP::is_outward_oriented(cmesh))
-				info.normalNum = cmesh.faces().size();
+			try {
+				if (!PMP::is_outward_oriented(cmesh))
+					info.normalNum = cmesh.faces().size();
+			}
+			catch (std::exception& e)
+			{
+				info.normalNum = 0;
+			}
+
 		}
 		else
 			info.normalNum = normalNum / 3; 
@@ -199,7 +206,7 @@ namespace cmesh
 			CMesh newMesh1;
 			std::vector<CMesh> _outMeshes;
 			removeNorVector(outTMeshes[i]);
-			_convertT2C(*outTMeshes[i], newMesh1);
+			_convertT2C(*outTMeshes[i], newMesh1,true);
 
 			//std::vector<std::vector<vertex_descriptor> > duplicated_vertices;
 			//std::size_t new_vertices_nb = PMP::duplicate_non_manifold_vertices(newMesh1,
