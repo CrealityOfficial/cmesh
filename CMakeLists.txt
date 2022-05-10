@@ -36,6 +36,8 @@ set(SRCS include/cmesh/interface.h
 		 impl/cholefill.cpp
 		 impl/tmeshutil.h
 		 impl/tmeshutil.cpp
+		 impl/repairNew.h
+		 impl/repairNew.cpp
 		 )
 		
 

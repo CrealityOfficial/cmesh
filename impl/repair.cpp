@@ -6,6 +6,8 @@
 #include "mmesh/trimesh/trimeshutil.h"
 #include "mmesh/util/dumplicate.h"
 
+#include "repairNew.h"
+
 namespace cmesh
 {
 	void getErrorInfoRich(RichMesh& mesh, ErrorInfo& info)
@@ -187,6 +189,13 @@ namespace cmesh
 			{
 				tracer->progress(countNums * count++);
 			}
+
+			if (tracer)
+			{
+				if (tracer->interrupt())
+					return ;
+			}
+
 			CMesh newMesh1;
 			std::vector<CMesh> _outMeshes;
 			removeNorVector(outTMeshes[i]);
@@ -205,6 +214,13 @@ namespace cmesh
 
 			outMeshes.push_back(newMesh1);
 		}
+
+		for (size_t i = 0; i < outTMeshes.size(); i++)
+		{
+			delete outTMeshes[i];
+			outTMeshes[i] = nullptr;
+		}
+		outTMeshes.clear();
 	}
 
 
@@ -270,6 +286,12 @@ namespace cmesh
 			if (tracer)
 			{
 				tracer->progress(countNums * count++);
+			}
+
+			if (tracer)
+			{
+				if (tracer->interrupt())
+					return;
 			}
 
 			//CMesh newMesh = outMeshes[i];
@@ -394,84 +416,110 @@ namespace cmesh
 
 	trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
 	{
-		//if (CGAL::is_closed(meshInput.impl().mesh))
+		return cmesh::repairMenuNew(mesh,refine_and_fair_hole,tracer);
+
+		////if (CGAL::is_closed(meshInput.impl().mesh))
+		////{
+		////	CGAL::Polygon_mesh_processing::orient(meshInput.impl().mesh);
+		////}
+
+		////orientedDetect(meshInput.impl().mesh, tracer);
+
+		////trimesh::TriMesh* mesh = meshInput.generateTrimesh();
+
+		//if (tracer)
 		//{
-		//	CGAL::Polygon_mesh_processing::orient(meshInput.impl().mesh);
+		//	tracer->progress(0.2f);
 		//}
 
-		//orientedDetect(meshInput.impl().mesh, tracer);
+		//if (tracer)
+		//{
+		//	if (tracer->interrupt())
+		//		return nullptr;
+		//}
 
-		//trimesh::TriMesh* mesh = meshInput.generateTrimesh();
+		//std::vector<CMesh> outMeshes;
+		//splitTmesh2Cmesh(mesh, outMeshes, tracer);
+		//if (outMeshes.size() == 0)
+		//	return nullptr;
 
-		if (tracer)
-		{
-			tracer->progress(0.2f);
-		}
+		//if (tracer)
+		//{
+		//	tracer->progress(0.4f);
+		//}
 
-		std::vector<CMesh> outMeshes;
-		splitTmesh2Cmesh(mesh, outMeshes, tracer);
-		if (outMeshes.size() == 0)
-			return nullptr;
+		//if (tracer)
+		//{
+		//	if (tracer->interrupt())
+		//		return nullptr;
+		//}
 
-		if (tracer)
-		{
-			tracer->progress(0.4f);
-		}
+		//trimesh::TriMesh* newMesh = new trimesh::TriMesh();
 
-		trimesh::TriMesh* newMesh = new trimesh::TriMesh();
+		//CMesh cmesh;//output
+		//if (outMeshes.size() > 1)
+		//{
+		//	std::vector<CMesh> coutward_oriented;
+		//	std::vector<CMesh> cinside_oriented;
+		//	splitByOrientedAndHoleFill(outMeshes, coutward_oriented, cinside_oriented, refine_and_fair_hole,tracer);
 
-		CMesh cmesh;//output
-		if (outMeshes.size() > 1)
-		{
-			std::vector<CMesh> coutward_oriented;
-			std::vector<CMesh> cinside_oriented;
-			splitByOrientedAndHoleFill(outMeshes, coutward_oriented, cinside_oriented, refine_and_fair_hole,tracer);
+		//	if (tracer)
+		//	{
+		//		tracer->progress(0.6f);
+		//	}
 
-			if (tracer)
-			{
-				tracer->progress(0.6f);
-			}
+		//	if (tracer)
+		//	{
+		//		if (tracer->interrupt())
+		//			return nullptr;
+		//	}
 
-			std::vector<trimesh::TriMesh*> meshes;
-			if (coutward_oriented.size() > 0) {
-				unionByOriented(meshes, coutward_oriented, true, tracer);
-			}
-			if (cinside_oriented.size() > 0) {
-				if (coutward_oriented.size() == 0)
-					unionByOriented(meshes, cinside_oriented, true, tracer);
-				else
-					unionByOriented(meshes, cinside_oriented, false, tracer);
-			}
+		//	std::vector<trimesh::TriMesh*> meshes;
+		//	if (coutward_oriented.size() > 0) {
+		//		unionByOriented(meshes, coutward_oriented, true, tracer);
+		//	}
+		//	if (cinside_oriented.size() > 0) {
+		//		if (coutward_oriented.size() == 0)
+		//			unionByOriented(meshes, cinside_oriented, true, tracer);
+		//		else
+		//			unionByOriented(meshes, cinside_oriented, false, tracer);
+		//	}
 
-			if (tracer)
-			{
-				tracer->progress(0.8f);
-			}
+		//	if (tracer)
+		//	{
+		//		tracer->progress(0.8f);
+		//	}
 
-			//newMesh->clear();
-			mmesh::mergeTriMesh(newMesh, meshes);
+		//	if (tracer)
+		//	{
+		//		if (tracer->interrupt())
+		//			return nullptr;
+		//	}
 
-			for (size_t i = 0; i < meshes.size(); i++)
-			{
-				delete meshes[i];
-			}
-			meshes.clear();
-		}
-		else
-		{
-			CMesh& cmesh = outMeshes.front();
-			//_convertT2C(outMeshes.front(),cmesh);
-			HoleFill(cmesh, refine_and_fair_hole,tracer);
-			orientedDetect(cmesh, tracer);
-			_convertC2T(cmesh, *newMesh);
-		}
+		//	//newMesh->clear();
+		//	mmesh::mergeTriMesh(newMesh, meshes);
 
-		if (tracer)
-		{
-			tracer->progress(1.0f);
-		}
+		//	for (size_t i = 0; i < meshes.size(); i++)
+		//	{
+		//		delete meshes[i];
+		//	}
+		//	meshes.clear();
+		//}
+		//else
+		//{
+		//	CMesh& cmesh = outMeshes.front();
+		//	//_convertT2C(outMeshes.front(),cmesh);
+		//	HoleFill(cmesh, refine_and_fair_hole,tracer);
+		//	orientedDetect(cmesh, tracer);
+		//	_convertC2T(cmesh, *newMesh);
+		//}
 
-		newMesh->need_normals();
-		return newMesh;
+		//if (tracer)
+		//{
+		//	tracer->progress(1.0f);
+		//}
+
+		//newMesh->need_normals();
+		//return newMesh;
 	}
 }
