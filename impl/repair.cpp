@@ -22,7 +22,13 @@ namespace cmesh
 		info.intersectNum = 0;
 
 		CMesh cmesh;
-		_convertT2C(*mesh, cmesh);
+		try {
+			_convertT2C(*mesh, cmesh);
+		}
+		catch (std::exception& e)
+		{
+			return;
+		}
 
 		int normalNum = 0;
 		for (halfedge_descriptor h : halfedges(cmesh))
@@ -51,6 +57,7 @@ namespace cmesh
 		else
 			info.normalNum = normalNum / 3; 
 
+#if 0  //检测影响加载时间
 		std::vector<halfedge_descriptor> border_cycles;
 		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
 		for (halfedge_descriptor h : border_cycles)
@@ -58,7 +65,6 @@ namespace cmesh
 			info.holeNum++;
 		}
 
-#if 0  //检测影响加载时间
 		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
 		std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
 		if (intersecting)
