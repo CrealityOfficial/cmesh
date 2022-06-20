@@ -535,4 +535,12 @@ namespace cmesh
 		//newMesh->need_normals();
 		//return newMesh;
 	}
+
+	void repairHoles(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer)
+	{
+		CMesh cmesh;
+		_convertT2C(*mesh, cmesh);
+		HoleFill(cmesh, true, tracer);
+		_convertC2T(cmesh, *mesh);
+	}
 }
