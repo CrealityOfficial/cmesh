@@ -17,6 +17,7 @@ namespace cmesh
 
 	CMESH_API void getErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info);
 
+	CMESH_API void getHoleErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info);
 	//typedef enum 
 	//{
 	//	refile_hole,
@@ -31,7 +32,7 @@ namespace cmesh
 
 	CMESH_API trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer);
 
-	void repairHoles(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer);
+	CMESH_API void repairHoles(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer);
 }
 
 #endif // CMESH_REPAIR_1648026566432_H

@@ -75,6 +75,30 @@ namespace cmesh
 #endif
 	}
 
+	void getHoleErrorInfo(trimesh::TriMesh* mesh, ErrorInfo& info)
+	{
+		info.edgeNum = 0;
+		info.normalNum = 0;
+		info.holeNum = 0;
+		info.intersectNum = 0;
+
+		CMesh cmesh;
+		try {
+			_convertT2C(*mesh, cmesh);
+		}
+		catch (std::exception& e)
+		{
+			return;
+		}
+
+		std::vector<halfedge_descriptor> border_cycles;
+		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
+		for (halfedge_descriptor h : border_cycles)
+		{
+			info.holeNum++;
+		}
+	}
+
 	void selfIntersections(CMesh& cmesh)
 	{
 		bool intersecting = PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh)));
