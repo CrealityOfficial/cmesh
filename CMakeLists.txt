@@ -38,6 +38,9 @@ set(SRCS include/cmesh/interface.h
 		 impl/tmeshutil.cpp
 		 impl/repairNew.h
 		 impl/repairNew.cpp
+		 
+		 include/cmesh/igl/str.h
+		 impl/igl/str.cpp
 		 )
 		
 
@@ -45,6 +48,14 @@ set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(LIBS trimesh2 clipper boost_system mmesh)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
+
+set(USE_IGL_STATIC 0)
+if(USE_IGL_STATIC)
+	list(APPEND DEFS IGL_STATIC_LIBRARY)
+	add_subdirectory(igl)
+else()
+	list(APPEND INCS ${CMAKE_CURRENT_SOURCE_DIR}/igl/include)
+endif()
 
 __add_platform_library(cmesh)
 
