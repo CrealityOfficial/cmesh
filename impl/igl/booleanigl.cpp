@@ -2,6 +2,9 @@
 #include <Eigen/Core>
 #include <igl/copyleft/cgal/mesh_boolean.h>
 
+#include <igl/write_triangle_mesh.h>
+#include <igl/read_triangle_mesh.h>
+
 namespace cmesh
 {
 	typedef struct Emesh{
@@ -77,6 +80,27 @@ namespace cmesh
 		E2T(out,e0);
 		out->need_normals();
 		return out;
+
+	}
+
+	CMESH_API trimesh::TriMesh* cxBooleanOperateMeshIGLObj(std::string& Mesh1Name, std::string& Mesh2Name)
+	{
+
+		Eigen::MatrixXd V1, V2, Vo;
+		Eigen::MatrixXi F1, F2, Fo;
+		igl::read_triangle_mesh(Mesh1Name, V1, F1);
+		igl::read_triangle_mesh(Mesh2Name, V2, F2);
+
+		igl::copyleft::cgal::mesh_boolean(V1, F1, V2, F2,
+			igl::MESH_BOOLEAN_TYPE_MINUS,
+			Vo, Fo);
+
+		igl::write_triangle_mesh("f:/iglout.stl", Vo, Fo);
+		//assert_no_exterior_edges(Fo);
+		//assert_is_manifold(Vo, Fo);
+		//assert_genus_eq(Vo, Fo, 1);
+
+		return nullptr;
 	}
 }
 
