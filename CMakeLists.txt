@@ -41,6 +41,8 @@ set(SRCS include/cmesh/interface.h
 		 
 		 include/cmesh/igl/str.h
 		 impl/igl/str.cpp
+		 include/cmesh/igl/booleanigl.h
+		 impl/igl/booleanigl.cpp
 		 )
 		
 
