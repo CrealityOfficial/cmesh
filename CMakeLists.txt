@@ -14,6 +14,8 @@ if (MSVC)
 endif ()
 
 __cc_find(CGAL)
+__cc_find(Eigen)
+__cc_find(Gmp)
 
 set(SRCS include/cmesh/interface.h
 		 include/cmesh/poly/roof.h
@@ -48,8 +50,8 @@ set(SRCS include/cmesh/interface.h
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS trimesh2 clipper boost_system mmesh)
-set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
+set(LIBS trimesh2 clipper boost_system mmesh gmp)
+set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY CGAL_USE_CORE)
 
 set(USE_IGL_STATIC 0)
 if(USE_IGL_STATIC)

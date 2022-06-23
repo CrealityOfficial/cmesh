@@ -2,6 +2,7 @@
 #define MMESH_BOOLEANIGL_1607481576423_H
 #include "cmesh/interface.h"
 #include "trimesh2/TriMesh.h"
+
 namespace cmesh
 {
 
