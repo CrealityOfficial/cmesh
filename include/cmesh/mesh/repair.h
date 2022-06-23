@@ -32,7 +32,7 @@ namespace cmesh
 
 	CMESH_API trimesh::TriMesh* repairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer);
 
-	CMESH_API void repairHoles(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer);
+	CMESH_API void repairHoles(trimesh::TriMesh* mesh, bool repaireModel, ccglobal::Tracer* tracer);
 }
 
 #endif // CMESH_REPAIR_1648026566432_H
