@@ -1,6 +1,6 @@
 __assert_target(trimesh2)
 
-__cc_find(Boost)
+#__cc_find(Boost)
 __cc_find(Eigen)
 __assert_target(boost_system)
 
@@ -14,8 +14,10 @@ if (MSVC)
 endif ()
 
 __cc_find(CGAL)
-__cc_find(Eigen)
-__cc_find(Gmp)
+
+if(USE_IGL)
+	__cc_find(Gmp)
+endif()
 
 set(SRCS include/cmesh/interface.h
 		 include/cmesh/poly/roof.h
@@ -40,12 +42,17 @@ set(SRCS include/cmesh/interface.h
 		 impl/tmeshutil.cpp
 		 impl/repairNew.h
 		 impl/repairNew.cpp
-		 
-		 include/cmesh/igl/str.h
-		 impl/igl/str.cpp
-		 include/cmesh/igl/booleanigl.h
-		 impl/igl/booleanigl.cpp
 		 )
+		 
+if(USE_IGL)
+		list(APPEND SRCS include/cmesh/igl/str.h
+			include/cmesh/igl/str.h
+			impl/igl/str.cpp
+			include/cmesh/igl/booleanigl.h
+			impl/igl/booleanigl.cpp
+			)
+endif()
+
 		
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
@@ -53,12 +60,14 @@ set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(LIBS trimesh2 clipper boost_system mmesh gmp)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY CGAL_USE_CORE)
 
-set(USE_IGL_STATIC 0)
-if(USE_IGL_STATIC)
-	list(APPEND DEFS IGL_STATIC_LIBRARY)
-	add_subdirectory(igl)
-else()
-	list(APPEND INCS ${CMAKE_CURRENT_SOURCE_DIR}/igl/include)
+if(USE_IGL)
+	set(USE_IGL_STATIC 0)
+	if(USE_IGL_STATIC)
+		list(APPEND DEFS IGL_STATIC_LIBRARY)
+		add_subdirectory(igl)
+	else()
+		list(APPEND INCS ${CMAKE_CURRENT_SOURCE_DIR}/igl/include)
+	endif()
 endif()
 
 __add_platform_library(cmesh)
