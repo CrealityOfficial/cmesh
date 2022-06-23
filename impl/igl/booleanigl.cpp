@@ -74,6 +74,7 @@ namespace cmesh
 			e0.V, e0.F);
 
 		trimesh::TriMesh* out;
+		E2T(out,e0);
 		out->need_normals();
 		return out;
 	}
