@@ -560,11 +560,11 @@ namespace cmesh
 		//return newMesh;
 	}
 
-	void repairHoles(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer)
+	void repairHoles(trimesh::TriMesh* mesh, bool repaireModel, ccglobal::Tracer* tracer)
 	{
 		CMesh cmesh;
 		_convertT2C(*mesh, cmesh);
-		HoleFill(cmesh, true, tracer);
+		HoleFill(cmesh, repaireModel, tracer);
 		_convertC2T(cmesh, *mesh);
 	}
 }

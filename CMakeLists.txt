@@ -14,6 +14,9 @@ if (MSVC)
 endif ()
 
 __cc_find(CGAL)
+if(NOT CGAL_INCLUDE_DIRS)
+	message(FATAL_ERROR "Please Specified CGAL_INCLUDE_DIRS")
+endif()
 
 if(USE_IGL)
 	__cc_find(Gmp)
@@ -55,7 +58,7 @@ endif()
 
 		
 
-set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(LIBS trimesh2 clipper boost_system mmesh)
 set(DEFS CGAL_NO_GMP=1 CGAL_NO_MPFR=1 CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
@@ -73,7 +76,7 @@ if(USE_IGL)
 	endif()
 endif()
 
-__add_platform_library(cmesh)
+__add_common_library(cmesh)
 
 if(CC_INSTALL_CMESH)
 	__install_directory_specif(${CMAKE_CURRENT_SOURCE_DIR}/include/ cmesh)

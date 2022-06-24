@@ -2,9 +2,16 @@
 #define CMESH_INTERFACE_1604911737496_H
 #include "ccglobal/export.h"
 
-#ifdef CMESH_DLL
-	#define CMESH_API CC_DECLARE_EXPORT
-#else
+#ifdef USE_CMESH_DLL
 	#define CMESH_API CC_DECLARE_IMPORT
+#elif USE_CMESH_STATIC
+	#define CMESH_API CC_DECLARE_STATIC
+#else
+	#ifdef CMESH_DLL
+	#define CMESH_API CC_DECLARE_EXPORT
+	#else
+	#define CMESH_API CC_DECLARE_STATIC
+	#endif
 #endif
+
 #endif // CMESH_INTERFACE_1604911737496_H
