@@ -43,24 +43,28 @@ namespace cmesh
 
 	void E2T(trimesh::TriMesh* Mesh1, emesh& emesh)
 	{
-		Mesh1 = new trimesh::TriMesh();
+		if (!Mesh1)
+		{
+			return;
+		}
 
 		const int number_of_vertices = emesh.V.size();
-		Mesh1->vertices.reserve(number_of_vertices);
-		for (int i = 0; i < number_of_vertices; i++)
+		Mesh1->vertices.reserve(number_of_vertices/3);
+		for (int i = 0; i < number_of_vertices/3; i++)
 		{
 			Mesh1->vertices.push_back(trimesh::point(emesh.V(i, 0), emesh.V(i, 1), emesh.V(i, 2)));
 		}
 
 		int number_of_triangles = emesh.F.size();
 		// allocate space for triangles
-		Mesh1->faces.reserve(number_of_triangles);
-		for (int i = 0; i < number_of_triangles; i++)
+		Mesh1->faces.reserve(number_of_triangles/3);
+		for (int i = 0; i < number_of_triangles/3; i++)
 		{
 			trimesh::TriMesh::Face f ;
 			f.x = emesh.F(i, 0);
 			f.y = emesh.F(i, 1);
 			f.z = emesh.F(i, 2);
+			Mesh1->faces.push_back(f);
 		}
 	}
 
@@ -70,13 +74,13 @@ namespace cmesh
 		emesh e1, e2, e0;
 
 		T2E(Mesh1, e1);
-		T2E(Mesh1, e2);
+		T2E(Mesh2, e2);
 
 		igl::copyleft::cgal::mesh_boolean(e1.V, e1.F, e2.V, e2.F,
 			igl::MESH_BOOLEAN_TYPE_MINUS,
 			e0.V, e0.F);
 
-		trimesh::TriMesh* out;
+		trimesh::TriMesh* out = new trimesh::TriMesh();
 		E2T(out,e0);
 		out->need_normals();
 		return out;
@@ -95,10 +99,13 @@ namespace cmesh
 			igl::MESH_BOOLEAN_TYPE_MINUS,
 			Vo, Fo);
 
-		igl::write_triangle_mesh("f:/iglout.stl", Vo, Fo);
-		//assert_no_exterior_edges(Fo);
-		//assert_is_manifold(Vo, Fo);
-		//assert_genus_eq(Vo, Fo, 1);
+		emesh e0;
+		e0.V = Vo;
+		e0.F = Fo;
+		trimesh::TriMesh* out = new trimesh::TriMesh();;
+		E2T(out, e0);
+		out->need_normals();
+		return out;
 
 		return nullptr;
 	}
