@@ -357,21 +357,25 @@ namespace cmesh
 			delete newMesh;
 			newMesh = nullptr;
 		}
-		if (CGAL::is_closed(cmeshA))
-		{
-			CGAL::Polygon_mesh_processing::orient(cmeshA);
-		}
 
-		try {
-			if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmeshA))
-			{
-				CGAL::Polygon_mesh_processing::reverse_face_orientations(cmeshA);
-			}
-		}
-		catch (std::exception& e)
-		{
-			std::cerr << e.what();
-		}
+        if (!CGAL::Polygon_mesh_processing::does_self_intersect(cmeshA))
+        {
+            if (CGAL::is_closed(cmeshA))
+            {
+                CGAL::Polygon_mesh_processing::orient(cmeshA);
+            }
+
+            try {
+                if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmeshA))
+                {
+                    CGAL::Polygon_mesh_processing::reverse_face_orientations(cmeshA);
+                }
+            }
+            catch (std::exception & e)
+            {
+                std::cerr << e.what();
+            }
+        }
 
 		newMesh = new trimesh::TriMesh();
 		_convertC2T(cmeshA, *newMesh);
