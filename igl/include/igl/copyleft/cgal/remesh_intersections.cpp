@@ -469,24 +469,9 @@ IGL_INLINE void igl::copyleft::cgal::remesh_intersections(
     // with so many Eigen parameters and possibly a type that doesn't have
     // .exact()
 
-      //TODO:
-    if (std::is_same<typename DerivedVV::Scalar, CGAL::Epeck::FT>())
-    {
-        for (Eigen::Index i = 0; i < U.size(); i++)
-        {
-            exact(*(U.data() + i));
-        }
-    }
-    else
-    {
-        igl::parallel_for(U.size(), [&](Eigen::Index& i) { exact(*(U.data() + i)); },
-            std::is_same<typename DerivedVV::Scalar, CGAL::Epeck::FT>() ?
-            1000 : U.size() + 1);
-    }
-
-    //igl::parallel_for(U.size(),[&](Eigen::Index &i){ exact(*(U.data()+i)); },
-    //  std::is_same<typename DerivedVV::Scalar,CGAL::Epeck::FT>()?
-    //    1000:U.size()+1);
+    igl::parallel_for(U.size(),[&](Eigen::Index &i){ exact(*(U.data()+i)); },
+      std::is_same<typename DerivedVV::Scalar,CGAL::Epeck::FT>()?
+        1000:U.size()+1);
 
 #ifdef REMESH_INTERSECTIONS_TIMING
     log_time("exact");

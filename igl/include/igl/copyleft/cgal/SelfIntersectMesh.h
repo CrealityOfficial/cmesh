@@ -894,9 +894,7 @@ inline void igl::copyleft::cgal::SelfIntersectMesh<
       exception = e;
     }
   };
-  //TODO:
-  //const size_t num_threads = default_num_threads();
-  const size_t num_threads = 1;
+  const size_t num_threads = default_num_threads();
   assert(num_threads > 0);
   const size_t num_pairs = candidate_triangle_pairs.size();
   const size_t chunk_size = num_pairs / num_threads;
