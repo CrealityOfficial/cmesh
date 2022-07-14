@@ -69,7 +69,7 @@ namespace cmesh
         }
     }
 
-    trimesh::TriMesh* cxBooleanOperateMeshIGLObj(trimesh::TriMesh* Mesh1, trimesh::TriMesh* Mesh2, ccglobal::Tracer* tracer)
+    trimesh::TriMesh* cxBooleanOperateMeshIGLObj(trimesh::TriMesh* Mesh1, trimesh::TriMesh* Mesh2, MeshBooleanType meshBooleanType, ccglobal::Tracer* tracer)
     {
 
         emesh e1, e2, e0;
@@ -97,7 +97,7 @@ namespace cmesh
         }
 
         igl::copyleft::cgal::mesh_boolean(e1.V, e1.F, e2.V, e2.F,
-            igl::MESH_BOOLEAN_TYPE_MINUS,
+            (igl::MeshBooleanType)meshBooleanType,
             e0.V, e0.F);
 
         if (tracer)
@@ -122,7 +122,7 @@ namespace cmesh
 
     }
 
-    trimesh::TriMesh* cxBooleanOperateMeshIGLObj(std::string& Mesh1Name, std::string& Mesh2Name, ccglobal::Tracer* tracer)
+    trimesh::TriMesh* cxBooleanOperateMeshIGLObj(std::string& Mesh1Name, std::string& Mesh2Name, MeshBooleanType meshBooleanType, ccglobal::Tracer* tracer)
     {
 
         Eigen::MatrixXd V1, V2, Vo;
@@ -131,7 +131,7 @@ namespace cmesh
         igl::read_triangle_mesh(Mesh2Name, V2, F2);
 
         igl::copyleft::cgal::mesh_boolean(V1, F1, V2, F2,
-            igl::MESH_BOOLEAN_TYPE_MINUS,
+            (igl::MeshBooleanType)meshBooleanType,
             Vo, Fo);
 
         emesh e0;
