@@ -10,8 +10,6 @@ __assert_target(trimesh2)
 __assert_target(boost_system)
 __assert_target(clipper)
 __assert_target(mmesh)
-__assert_target(eigen)
-__assert_target(cgal)
 
 if(NOT EIGEN_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
