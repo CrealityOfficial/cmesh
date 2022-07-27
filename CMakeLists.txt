@@ -1,8 +1,13 @@
-__assert_target(trimesh2)
 
-#__cc_find(Boost)
-#__cc_find(Eigen)
+__cc_find(Trimesh2)
+__cc_find(Boost)
+__cc_find(Clipper)
+__cc_find(MMesh)
+
+__assert_target(trimesh2)
 __assert_target(boost_system)
+__assert_target(clipper)
+__assert_target(mmesh)
 
 if(NOT EIGEN_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
