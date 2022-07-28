@@ -1,4 +1,4 @@
-#include "adduvs.h"
+#include "cmesh/uvs/adduvs.h"
 #include "ccglobal/tracer.h"
 
 #include "ccglobal/spycc.h"
