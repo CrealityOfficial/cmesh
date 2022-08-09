@@ -394,4 +394,10 @@ namespace cmesh
 
 		return newMesh;
 	}
+
+	trimesh::TriMesh* generatePedestal(trimesh::TriMesh* inMesh, ccglobal::Tracer* tracer)
+	{
+		return nullptr;
+	}
+
 }

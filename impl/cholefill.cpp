@@ -146,4 +146,81 @@ namespace cmesh
         }
         return true;
     }
+
+	bool pedestalFilling(CMesh& cmesh, float fZ, bool isSmooth, ccglobal::Tracer* tracer)
+	{
+		if (tracer) tracer->progress(0.4f);
+		std::vector<halfedge_descriptor> border_cycles;
+		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
+		for (halfedge_descriptor ahalfedge : border_cycles)
+		{
+			std::vector<Point> Vertexes;
+			std::vector<vertex_descriptor> indexes;
+
+			CGAL::Halfedge_around_face_circulator<CMesh>  circ1(ahalfedge, cmesh), done(circ1);
+			do
+			{
+				vertex_descriptor  avertex_descriptor = target(*circ1, cmesh);
+				Point aPoint_3 = cmesh.point(avertex_descriptor);
+				Vertexes.push_back(aPoint_3);
+				indexes.push_back(avertex_descriptor);
+			} while (++circ1 != done);
+
+			int vNum = cmesh.num_vertices();
+
+			vertex_descriptor prevIndex, prevZ0Index, currentZ0Index, firstZ0Index;
+			for (int n = 0; n < indexes.size(); n++)
+			{
+				if (n == 0)
+				{
+					currentZ0Index = cmesh.add_vertex(Point(Vertexes.at(n).x(), Vertexes.at(n).y(), fZ));
+					firstZ0Index = currentZ0Index;
+
+					prevZ0Index = currentZ0Index;
+					prevIndex = indexes[n];
+				}
+				else
+				{
+					currentZ0Index = cmesh.add_vertex(Point(Vertexes.at(n).x(), Vertexes.at(n).y(), fZ));
+
+					cmesh.add_face(prevZ0Index, prevIndex, indexes[n]);
+					cmesh.add_face(prevZ0Index, indexes[n], currentZ0Index);
+
+					prevZ0Index = currentZ0Index;
+					prevIndex = indexes[n];
+				}
+			}
+			cmesh.add_face(prevZ0Index, prevIndex, indexes[0]);
+			cmesh.add_face(prevZ0Index, indexes[0], firstZ0Index);
+		}
+
+		border_cycles.clear();
+		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
+        for (halfedge_descriptor h : border_cycles)
+        {
+			//if (isSmooth)
+			//{
+
+			//	std::vector<face_descriptor>  patch_facets;
+			//	std::vector<vertex_descriptor> patch_vertices;
+			//	bool success = std::get<0>(PMP::triangulate_refine_and_fair_hole(cmesh,
+			//		h,
+			//		std::back_inserter(patch_facets),
+			//		std::back_inserter(patch_vertices)));
+			//}
+   //         else
+            {
+				//这个地方花费时间特别多
+				std::vector<typename boost::graph_traits<CMesh>::face_descriptor> patch;
+				PMP::triangulate_hole(cmesh, h, std::back_inserter(patch), CGAL::Polygon_mesh_processing::parameters::all_default());
+            }
+        }
+
+		if (tracer)
+		{
+			tracer->progress(1.0f);
+		}
+		return true;
+	}
+
 }
