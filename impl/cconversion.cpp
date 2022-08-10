@@ -24,6 +24,21 @@ namespace cmesh
 		PMP::polygon_soup_to_polygon_mesh(points, faces, mesh);
 	}
 
+    void _convertT2CForNoRepair(trimesh::TriMesh& tmesh, CMesh& mesh)
+    {
+        mesh.clear();
+        std::vector<vertex_descriptor> vertexdescriptor;
+        vertexdescriptor.reserve(tmesh.vertices.size());
+        for (const trimesh::point& p : tmesh.vertices) {
+            vertexdescriptor.push_back(mesh.add_vertex(Point(p.x, p.y, p.z)));
+        }
+
+        for (const trimesh::TriMesh::Face& f : tmesh.faces) {
+            int a = mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
+            int b = 0;
+        }
+    }
+
 	void _convertC2T(const CMesh& mesh, trimesh::TriMesh& tmesh)
 	{
 		tmesh.vertices.clear();

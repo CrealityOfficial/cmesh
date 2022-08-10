@@ -24,7 +24,8 @@ set(SRCS include/cmesh/interface.h
 		 include/cmesh/mesh/richmesh.h
 		 include/cmesh/mesh/repair.h
 		 include/cmesh/mesh/pedestal.h
-		 
+		 include/cmesh/cgal/subrepair.h
+
 		 impl/roof.cpp
 		 impl/boolean.cpp
 		 impl/richmesh.cpp
@@ -43,6 +44,8 @@ set(SRCS include/cmesh/interface.h
 		 impl/repairNew.h
 		 impl/repairNew.cpp
 		 impl/pedestal.cpp
+
+		impl/cgal/subrepair.cpp
 		 )
 		 
 if(USE_IGL)
