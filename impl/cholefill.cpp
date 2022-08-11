@@ -157,8 +157,6 @@ namespace cmesh
 		if (tracer) tracer->progress(0.4f);
 		std::vector<halfedge_descriptor> border_cycles;
 		PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
-
-		std::vector<trimesh::TriMesh::Face> triangles;
 		for (halfedge_descriptor ahalfedge : border_cycles)
 		{
 			std::vector<Point> Vertexes;
@@ -251,6 +249,7 @@ namespace cmesh
 			}
 
 			mmesh::PolygonStack apoly;
+            std::vector<trimesh::TriMesh::Face> triangles;
 			apoly.generatesWithoutTree(polygonses, points, triangles);
             vertex_descriptor firstZ0Index;
 			for (int n=0;n<points.size();++n)
