@@ -11,7 +11,7 @@ namespace cmesh
 		uper,
 		down
 	};
-	struct pedestalParam
+	struct PedestalParam
 	{
 		float height;
 		bool isSmooth;
@@ -19,7 +19,7 @@ namespace cmesh
 	};
 
 
-	CMESH_API trimesh::TriMesh* pedestalMenu(trimesh::TriMesh* mesh, pedestalParam apram, ccglobal::Tracer* tracer);
+	CMESH_API trimesh::TriMesh* pedestalMenu(trimesh::TriMesh* mesh, PedestalParam apram, ccglobal::Tracer* tracer);
 }
 
 #endif // CMESH_PEDESTAL_1648026566432_H

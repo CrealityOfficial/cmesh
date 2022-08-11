@@ -9,7 +9,7 @@
 
 namespace cmesh
 {
-	trimesh::TriMesh* pedestalMenu(trimesh::TriMesh* mesh, pedestalParam apram, ccglobal::Tracer* tracer)
+	trimesh::TriMesh* pedestalMenu(trimesh::TriMesh* mesh, PedestalParam apram, ccglobal::Tracer* tracer)
 	{
 		if (tracer) tracer->progress(0.2f);
 		if (tracer)
@@ -77,6 +77,7 @@ namespace cmesh
 
 		trimesh::TriMesh* output2 = new trimesh::TriMesh();//合并多个output 为一个trimesh
 		mmesh::mergeTriMesh(output2, output);
+		mmesh::dumplicateMesh(output2);
 		return output2;
 	}
 }
