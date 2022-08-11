@@ -17,6 +17,8 @@ namespace cmesh
         std::vector<edge_descriptor>& m_edges;
     };
 
+    
+
     // Optional visitor for orientating a polygon soup to demonstrate usage for some functions.
     // inherits from the default class as some functions are not overloaded
     struct Visitor : public CGAL::Polygon_mesh_processing::Default_orientation_visitor
@@ -202,5 +204,51 @@ namespace cmesh
         trimesh::TriMesh* newMesh = new trimesh::TriMesh;
         _convertC2T(cmesh, *newMesh);
         return newMesh;
+    }
+
+    trimesh::TriMesh* stitch(trimesh::TriMesh* mesh, ccglobal::Tracer* trace)
+    {
+        CMesh cmesh;
+        _convertT2CForNoRepair(*mesh, cmesh);
+
+        int unm = PMP::stitch_borders(cmesh);
+
+        trimesh::TriMesh* newMesh = new trimesh::TriMesh;
+        _convertC2T(cmesh, *newMesh);
+        return newMesh;
+    }
+
+    trimesh::TriMesh* manifoldness(trimesh::TriMesh* mesh, ccglobal::Tracer* trace)
+    { 
+        CMesh cmesh;
+        _convertT2CForNoRepair(*mesh, cmesh);
+
+        std::vector<std::vector<vertex_descriptor> > duplicated_vertices;
+        std::size_t new_vertices_nb = PMP::duplicate_non_manifold_vertices(cmesh,
+            NP::output_iterator(
+                std::back_inserter(duplicated_vertices)));
+
+        trimesh::TriMesh* newMesh = new trimesh::TriMesh;
+        _convertC2T(cmesh, *newMesh);
+        return newMesh;
+    }
+
+    trimesh::TriMesh* connectedComponents(trimesh::TriMesh* mesh, ccglobal::Tracer* trace)
+    {
+        //CMesh cmesh;
+        //_convertT2CForNoRepair(*mesh, cmesh);
+
+        //typedef boost::graph_traits<CMesh>::face_descriptor face_descriptor;
+        //const double bound = std::cos(0.75 * CGAL_PI);
+        //std::vector<face_descriptor> cc;
+        //face_descriptor fd = *faces(cmesh).first;
+
+        ////PMP::connected_component(fd,
+        ////    cmesh,
+        ////    boost::make_function_output_iterator(Put_true<F_select_map>(fselect_map)));
+
+        //trimesh::TriMesh* newMesh = new trimesh::TriMesh;
+        //_convertC2T(cmesh, *newMesh);
+        //return newMesh;
     }
 }

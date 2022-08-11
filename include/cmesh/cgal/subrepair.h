@@ -35,5 +35,14 @@ namespace cmesh
 
     //orientation
     CMESH_API trimesh::TriMesh* orientation(trimesh::TriMesh* mesh, bool reversible = false, ccglobal::Tracer* trace = nullptr);
+
+    //combinatorial  stitch
+    CMESH_API trimesh::TriMesh* stitch(trimesh::TriMesh* mesh, ccglobal::Tracer* trace = nullptr);
+    //combinatorial  stitch
+    CMESH_API trimesh::TriMesh* manifoldness(trimesh::TriMesh* mesh, ccglobal::Tracer* trace = nullptr);
+
+    //connected
+    CMESH_API trimesh::TriMesh* connectedComponents(trimesh::TriMesh* mesh, ccglobal::Tracer* trace = nullptr);
+
 }
 #endif // CMESH_SUBREPAIR_1648026566432_H
