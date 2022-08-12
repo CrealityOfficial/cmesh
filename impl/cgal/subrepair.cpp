@@ -250,5 +250,7 @@ namespace cmesh
         //trimesh::TriMesh* newMesh = new trimesh::TriMesh;
         //_convertC2T(cmesh, *newMesh);
         //return newMesh;
+
+        return nullptr;
     }
 }
