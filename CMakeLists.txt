@@ -1,4 +1,4 @@
-__cc_find(Trimesh2)
+__cc_find(TriMesh2)
 __assert_target(trimesh2)
 
 __cc_find(Boost)
@@ -24,9 +24,10 @@ set(SRCS include/cmesh/interface.h
 		 include/cmesh/mesh/boolean.h
 		 include/cmesh/mesh/richmesh.h
 		 include/cmesh/mesh/repair.h
-		 include/cmesh/mesh/pedestal.h
+                	 include/cmesh/mesh/pedestal.h
 		 include/cmesh/cgal/subrepair.h
-
+        		 include/cmesh/uvs/adduvs.h
+		 
 		 impl/roof.cpp
 		 impl/boolean.cpp
 		 impl/richmesh.cpp
@@ -45,8 +46,8 @@ set(SRCS include/cmesh/interface.h
 		 impl/repairNew.h
 		 impl/repairNew.cpp
 		 impl/pedestal.cpp
-
-		impl/cgal/subrepair.cpp
+		 impl/cgal/subrepair.cpp
+		 impl/adduvs.cpp
 		 )
 		 
 if(USE_IGL)
