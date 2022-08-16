@@ -3,6 +3,7 @@ __assert_target(trimesh2)
 
 __cc_find(Boost)
 __cc_find(Eigen)
+__cc_find(tbb)
 __assert_target(boost_system)
 
 if(NOT EIGEN_INCLUDE_DIRS)
@@ -14,6 +15,7 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif ()
 
+add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
 __cc_find(CGAL)
 if(NOT CGAL_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified CGAL_INCLUDE_DIRS")
@@ -25,7 +27,8 @@ set(SRCS include/cmesh/interface.h
 		 include/cmesh/mesh/richmesh.h
 		 include/cmesh/mesh/repair.h
                 	 include/cmesh/mesh/pedestal.h
-		 include/cmesh/cgal/subrepair.h
+		 include/cmesh/cgal/subrepairmenu.h
+		 include/cmesh/cgal/subrepairtype.h
         		 include/cmesh/uvs/adduvs.h
 		 
 		 impl/roof.cpp
@@ -46,7 +49,9 @@ set(SRCS include/cmesh/interface.h
 		 impl/repairNew.h
 		 impl/repairNew.cpp
 		 impl/pedestal.cpp
+		 impl/cgal/subrepair.h
 		 impl/cgal/subrepair.cpp
+		 impl/cgal/subrepairmenu.cpp
 		 impl/adduvs.cpp
 		 )
 		 
@@ -61,8 +66,8 @@ endif()
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS trimesh2 clipper boost_system mmesh )
-set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY)
+set(LIBS trimesh2 clipper boost_system mmesh tbb)
+set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
 if(USE_IGL)
 	list(APPEND INCS ${BOOST_INCLUDE_DIRS} ${mpfr_INCLUDE_DIRS})	

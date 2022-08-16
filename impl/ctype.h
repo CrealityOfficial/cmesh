@@ -29,6 +29,8 @@
 
 #include <CGAL/Polygon_mesh_processing/self_intersections.h>
 
+#include <CGAL/Polygon_mesh_processing/detect_features.h>
+
 typedef CGAL::Exact_predicates_inexact_constructions_kernel   K;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel   Kernel;
 typedef Kernel::Point_3                                       Point;
@@ -42,5 +44,18 @@ typedef boost::graph_traits<CMesh>::face_descriptor          face_descriptor;
 namespace PMP = CGAL::Polygon_mesh_processing;
 namespace params = CGAL::Polygon_mesh_processing::parameters;
 namespace NP = CGAL::parameters;
+
+struct halfedge2edge
+{
+    halfedge2edge(const CMesh& m, std::vector<edge_descriptor>& edges)
+        : m_mesh(m), m_edges(edges)
+    {}
+    void operator()(const halfedge_descriptor& h) const
+    {
+        m_edges.push_back(edge(h, m_mesh));
+    }
+    const CMesh& m_mesh;
+    std::vector<edge_descriptor>& m_edges;
+};
 
 #endif // CMESH_CGAL_TYPE_1605318972342_H

@@ -48,7 +48,8 @@ namespace cmesh
         {
             return;
         }
-
+        Mesh1->vertices.clear();
+        Mesh1->faces.clear();
         const int number_of_vertices = emesh.V.size();
         Mesh1->vertices.reserve(number_of_vertices / 3);
         for (int i = 0; i < number_of_vertices / 3; i++)

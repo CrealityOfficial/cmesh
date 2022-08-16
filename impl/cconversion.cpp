@@ -1,5 +1,6 @@
 #include "cconversion.h"
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
+#include "mmesh/trimesh/algrithm3d.h"
 
 namespace cmesh
 {
@@ -32,10 +33,11 @@ namespace cmesh
         for (const trimesh::point& p : tmesh.vertices) {
             vertexdescriptor.push_back(mesh.add_vertex(Point(p.x, p.y, p.z)));
         }
-
         for (const trimesh::TriMesh::Face& f : tmesh.faces) {
-            int a = mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
-            int b = 0;
+
+            if (f.x != f.y && f.x != f.z && f.y != f.z
+                && mmesh::GetArea(tmesh.vertices[f.x], tmesh.vertices[f.y], tmesh.vertices[f.z])>0.10f)
+                int a = mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);   
         }
     }
 
