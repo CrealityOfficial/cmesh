@@ -8,6 +8,8 @@
 
 #include "repairNew.h"
 
+#include "cgal/subrepair.h"
+
 namespace cmesh
 {
 	void getErrorInfoRich(RichMesh& mesh, ErrorInfo& info)
@@ -23,39 +25,60 @@ namespace cmesh
 
 		CMesh cmesh;
 		try {
-			_convertT2C(*mesh, cmesh);
+            _convertT2CForNoRepair(*mesh, cmesh);
 		}
 		catch (std::exception& e)
 		{
 			return;
 		}
 
-		int normalNum = 0;
-		for (halfedge_descriptor h : halfedges(cmesh))
-		{
-			if (is_border(h, cmesh))
-			{
-				info.edgeNum++;
-			}
-			else if (is_isolated_triangle(h, cmesh))
-			{
-				normalNum++;
-			}
-		}
-		if (normalNum==0 && CGAL::is_closed(cmesh))
-		{
-			try {
-				if (!PMP::is_outward_oriented(cmesh))
-					info.normalNum = cmesh.faces().size();
-			}
-			catch (std::exception& e)
-			{
-				info.normalNum = 0;
-			}
+		//int normalNum = 0;
+		//for (halfedge_descriptor h : halfedges(cmesh))
+		//{
+		//	if (is_border(h, cmesh))
+		//	{
+		//		info.edgeNum++;
+		//	}
+		//	else if (is_isolated_triangle(h, cmesh))
+		//	{
+		//		normalNum++;
+		//	}
+		//}
+		//if (normalNum==0 && CGAL::is_closed(cmesh))
+		//{
+		//	try {
+		//		if (!PMP::is_outward_oriented(cmesh))
+		//			info.normalNum = cmesh.faces().size();
+		//	}
+		//	catch (std::exception& e)
+		//	{
+		//		info.normalNum = 0;
+		//	}
 
-		}
-		else
-			info.normalNum = normalNum / 3; 
+		//}
+		//else
+		//	info.normalNum = normalNum / 3; 
+
+        std::vector<face_descriptor>  patch_facets;
+        std::vector<halfedge_descriptor> border_cycles;
+        PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
+        for (halfedge_descriptor h : border_cycles)
+        {
+            patch_facets.clear();
+            PMP::triangulate_hole(cmesh,
+                h,
+                std::back_inserter(patch_facets));
+
+            info.edgeNum += patch_facets.size()*3;
+        }
+
+        //if (!CGALselfIntersections(cmesh1, faceIndex, true, tracer))
+        if (CGAL::is_valid_polygon_mesh(cmesh))
+        {
+            if (CGAL::is_closed(cmesh)&& CGAL::is_triangle_mesh(cmesh))
+             if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+                 info.normalNum = 1;         
+        }
 
 #if 0  //检测影响加载时间
 		std::vector<halfedge_descriptor> border_cycles;
@@ -560,11 +583,28 @@ namespace cmesh
 		//return newMesh;
 	}
 
+    bool testIntersect(CMesh cmesh, ccglobal::Tracer* tracer)
+    {
+        //for test 
+        std::vector<int> faceIndex;   
+        CGALselfIntersections(cmesh, faceIndex, true, tracer);
+        HoleFill(cmesh, false, tracer);
+        if (PMP::does_self_intersect<CGAL::Parallel_if_available_tag>(cmesh, CGAL::parameters::vertex_point_map(get(CGAL::vertex_point, cmesh))))
+        {
+            return false; 
+        }
+        return true;
+    }
+
 	void repairHoles(trimesh::TriMesh* mesh, bool repaireModel, ccglobal::Tracer* tracer)
 	{
 		CMesh cmesh;
 		_convertT2C(*mesh, cmesh);
-		HoleFill(cmesh, repaireModel, tracer);
-		_convertC2T(cmesh, *mesh);
+
+        //if (testIntersect(cmesh, tracer))
+        {
+            HoleFill(cmesh, repaireModel, tracer);
+            _convertC2T(cmesh, *mesh);
+        }
 	}
 }
