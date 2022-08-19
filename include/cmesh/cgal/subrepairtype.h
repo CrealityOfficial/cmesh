@@ -16,7 +16,9 @@ namespace cmesh
         CGAL_CONNECTED,
         CGAL_HOLE,
         CGAL_TRIANGULATE,
-        CGAL_FEATURES
+        CGAL_FEATURES,
+        CGAL_SMOTHING,
+        CGAL_TANGENTIAL
     };
 
     enum class CGALBooleanType  //布尔运算类型
@@ -37,6 +39,7 @@ namespace cmesh
     {
         CGALRepairType repairType;  //修复类型
 
+        double smothing_angle; //根据角度细化
         double target_edge_length;  //细化孔洞边界 边长   
         CGALBooleanType booleanType; //布尔运算类型
         CGALHoleFillType holeFillType; //孔洞填充类型

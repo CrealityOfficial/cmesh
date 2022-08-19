@@ -9,11 +9,17 @@ namespace cmesh
 {
     void CGALisotropicRemeshing(CMesh& cmesh, double target_edge_length, ccglobal::Tracer* trace = nullptr);
 
+    //根据角度三角化
+    void CGALsmoothing(CMesh& cmesh, double angle, ccglobal::Tracer* trace = nullptr);
+
     //细化两个模型的相交区域
     void CGALcorefinement(CMesh& cmesh1, CMesh& cmesh2, ccglobal::Tracer* trace = nullptr);
 
-    //三角化
+    //三角化:局部优化
     void CGALtriangulate(CMesh& cmesh1, ccglobal::Tracer* trace = nullptr);
+
+    //三角化:修复自交问题
+    void CGALtangential(CMesh& cmesh1, ccglobal::Tracer* trace = nullptr);
 
     //boolean
     void CGALboolean(CMesh& cmesh1, CMesh& cmesh2, CMesh& cmeshOut, CGALBooleanType type, ccglobal::Tracer* trace = nullptr);

@@ -29,6 +29,26 @@ namespace cmesh
         }
     };
 
+    void CGALsmoothing(CMesh& cmesh, double angle, ccglobal::Tracer* trace)
+    {
+        // Constrain edges with a dihedral angle over 60°
+        typedef boost::property_map<CMesh, CGAL::edge_is_feature_t>::type EIFMap;
+        EIFMap eif = get(CGAL::edge_is_feature, cmesh);
+        PMP::detect_sharp_edges(cmesh, angle, eif);
+        int sharp_counter = 0;
+        for (edge_descriptor e : edges(cmesh))
+            if (get(eif, e))
+                ++sharp_counter;
+        std::cout << sharp_counter << " sharp edges" << std::endl;
+        const unsigned int nb_iterations = 10;
+        std::cout << "Smoothing mesh... (" << nb_iterations << " iterations)" << std::endl;
+        // Smooth with both angle and area criteria + Delaunay flips
+        PMP::angle_and_area_smoothing(cmesh, CGAL::parameters::number_of_iterations(nb_iterations)
+            .use_safety_constraints(false) // authorize all moves
+            .edge_is_constrained_map(eif));
+
+    }
+
     void CGALisotropicRemeshing(CMesh& cmesh, double target_edge_length, ccglobal::Tracer* trace)
     {
         if (!CGAL::is_triangle_mesh(cmesh))
@@ -64,6 +84,15 @@ namespace cmesh
         for (boost::graph_traits<CMesh>::face_descriptor f : faces(cmesh1))
             if (!CGAL::is_triangle(halfedge(f, cmesh1), cmesh1))
                 std::cerr << "Error: non-triangular face left in mesh." << std::endl;
+    }
+
+    //三角化:修复自交问题
+    void CGALtangential(CMesh& cmesh, ccglobal::Tracer* trace)
+    {
+        unsigned int nb_iter = 10;
+        std::cout << "Relax...";
+        PMP::tangential_relaxation(cmesh, CGAL::parameters::number_of_iterations(nb_iter));
+        std::cout << "done." << std::endl;
     }
 
     void CGALboolean(CMesh& cmesh1, CMesh& cmesh2, CMesh& cmeshOut, CGALBooleanType type, ccglobal::Tracer* trace)
@@ -134,10 +163,19 @@ namespace cmesh
             std::vector<std::pair<face_descriptor, face_descriptor> > intersected_tris;
             PMP::self_intersections<CGAL::Parallel_if_available_tag>(faces(cmesh), cmesh, std::back_inserter(intersected_tris));
        
-            for (int i = 0; i < intersected_tris.size(); ++i)
+
+            if (intersected_tris.size())
             {
-                faceIndexs.push_back(intersected_tris[i].first);
-                faceIndexs.push_back(intersected_tris[i].second);
+                faceIndexs.push_back(intersected_tris[0].first);
+            }
+            for (int i = 1; i < intersected_tris.size(); ++i)
+            {
+                if (faceIndexs.end() == std::find(faceIndexs.begin(), faceIndexs.end(),intersected_tris[i].first)
+                    && faceIndexs.end() == std::find(faceIndexs.begin(), faceIndexs.end(), intersected_tris[i].second))
+                {
+                    faceIndexs.push_back(intersected_tris[i].first);
+                    //faceIndexs.push_back(intersected_tris[i].second);
+                }
             }
             std::sort(faceIndexs.begin(), faceIndexs.end());
             faceIndexs.erase(std::unique(faceIndexs.begin(), faceIndexs.end()), faceIndexs.end());
@@ -180,23 +218,61 @@ namespace cmesh
 
     void CGALorientation(CMesh& cmesh, bool reversible, ccglobal::Tracer* trace)
     {
-        if (CGAL::is_closed(cmesh))
+        if (!CGAL::is_closed(cmesh))
+            return;
+
         {
-            CGAL::Polygon_mesh_processing::orient(cmesh);
+            //CGAL::Polygon_mesh_processing::orient(cmesh);
         }
 
-        //if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+        ////if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+        ////{
+        ////    CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
+        ////}
+
+        ////if (CGAL::is_closed(cmesh))
+        ////    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(cmesh);
+
+        //if (reversible)
         //{
         //    CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
         //}
-
-        if (CGAL::is_closed(cmesh))
-            CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(cmesh);
-
-        if (reversible)
+        std::vector<CMesh> cmeshs;
+        CGAL::Polygon_mesh_processing::split_connected_components(cmesh,cmeshs);
+        for (size_t i = 0; i < cmeshs.size(); i++)
         {
-            CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
+            if (!CGAL::is_valid_polygon_mesh(cmeshs[i]))
+                continue;
+
+            try {
+                if (CGAL::is_closed(cmeshs[i]))
+                {
+                    CGAL::Polygon_mesh_processing::orient(cmeshs[i]);
+                }
+
+                //if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
+                //{
+                //    CGAL::Polygon_mesh_processing::reverse_face_orientations(cmesh);
+                //}
+
+                if (CGAL::is_closed(cmeshs[i]))
+                    CGAL::Polygon_mesh_processing::orient_to_bound_a_volume(cmeshs[i]);
+
+
+                if (reversible)
+                {
+                    CGAL::Polygon_mesh_processing::reverse_face_orientations(cmeshs[i]);
+                }
+            }
+            catch (std::exception & e)
+            {
+                return;
+            }
+
         }
+        cmesh.clear();
+        _convertTs2T(cmesh, cmeshs);
+       
     }
 
     void CGALstitch(CMesh& cmesh, ccglobal::Tracer* trace)
@@ -222,6 +298,11 @@ namespace cmesh
         ////PMP::connected_component(fd,
         ////    cmesh,
         ////    boost::make_function_output_iterator(Put_true<F_select_map>(fselect_map)));
+
+        const double bound = std::cos(0.75 * CGAL_PI);
+        PMP::keep_large_connected_components(cmesh,
+            2,
+            CGAL::parameters::edge_is_constrained_map(Constraint<CMesh>(cmesh, bound)));
     }
 
     void CGALdetectFeatures(CMesh& cmesh, ccglobal::Tracer* trace)
@@ -234,7 +315,7 @@ namespace cmesh
         PIMap pid = get(CGAL::face_patch_id_t<int>(), cmesh);
         VIMap vip = get(CGAL::vertex_incident_patches_t<int>(), cmesh);
         std::size_t number_of_patches
-            = PMP::sharp_edges_segmentation(cmesh, 10, eif, pid,
+            = PMP::sharp_edges_segmentation(cmesh, 90, eif, pid,
                 CGAL::parameters::vertex_incident_patches_map(vip));
         std::size_t nb_sharp_edges = 0;
         for (boost::graph_traits<CMesh>::edge_descriptor e : edges(cmesh))

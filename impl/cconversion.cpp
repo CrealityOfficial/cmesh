@@ -25,7 +25,7 @@ namespace cmesh
 		PMP::polygon_soup_to_polygon_mesh(points, faces, mesh);
 	}
 
-    void _convertT2CForNoRepair(trimesh::TriMesh& tmesh, CMesh& mesh)
+    void _convertT2CForNoRepair(trimesh::TriMesh& tmesh, CMesh& mesh, bool bDeleteSamallFace)
     {
         mesh.clear();
         std::vector<vertex_descriptor> vertexdescriptor;
@@ -33,11 +33,40 @@ namespace cmesh
         for (const trimesh::point& p : tmesh.vertices) {
             vertexdescriptor.push_back(mesh.add_vertex(Point(p.x, p.y, p.z)));
         }
-        for (const trimesh::TriMesh::Face& f : tmesh.faces) {
+        if (bDeleteSamallFace)
+        {
+            float angle = 180.0f;
+            for (int i = 0; i < tmesh.faces.size(); i++) {
+                const trimesh::TriMesh::Face& f = tmesh.faces[i];
+                if (f.x != f.y && f.x != f.z && f.y != f.z)
+                {
+                    angle = 180.0f;
+                    //mmesh::GetArea(tmesh.vertices[f.x], tmesh.vertices[f.y], tmesh.vertices[f.z]) > 0.0f)
+                    for (size_t j = 0; j < 3; j++)
+                    {
+                        trimesh::point& p0 = tmesh.vertices[f[j]];
+                        trimesh::point& p1 = tmesh.vertices[f[(j + 1) % 3]];
+                        trimesh::point& p2 = tmesh.vertices[f[(j + 2) % 3]];
+                        trimesh::point np0p1 = trimesh::normalized(p1 - p0);
+                        trimesh::point np0p2 = trimesh::normalized(p2 - p0);
 
-            if (f.x != f.y && f.x != f.z && f.y != f.z
-                && mmesh::GetArea(tmesh.vertices[f.x], tmesh.vertices[f.y], tmesh.vertices[f.z])>0.10f)
-                int a = mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);   
+                        angle = std::min(angle, acos(np0p1 DOT np0p2));
+                    }
+                    if (angle > 0.001)//3бу
+                    {
+                        mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (const trimesh::TriMesh::Face& f : tmesh.faces) {
+                if (f.x != f.y && f.x != f.z && f.y != f.z)
+                {
+                    mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
+                }
+            }
         }
     }
 
@@ -77,4 +106,37 @@ namespace cmesh
 			}
 		}
 	}
+
+    void _convertTs2T(CMesh& mesh, std::vector< CMesh>& meshs)
+    {
+        for (size_t i = 0; i < meshs.size(); i++)
+        {
+            std::vector<vertex_descriptor> vertexdescriptor;
+            for (const Point& v : meshs[i].points()) {
+                vertexdescriptor.push_back(mesh.add_vertex(v));
+            }
+
+            for (CMesh::Face_index face_index : meshs[i].faces())
+            {
+                trimesh::TriMesh::Face f;
+                // Mesh::Vertex_around_face_circulator fvit(surfaceMesh.halfedge(face_index), surfaceMesh);
+                CGAL::Vertex_around_face_circulator<CMesh> vcirc(meshs[i].halfedge(face_index), meshs[i]), done(vcirc);
+                int index = 0;
+                if (vcirc)
+                {
+                    do
+                    {
+                        //std::cout << (*vcirc).idx() << std::endl;
+                        f[index] = (*vcirc).idx();
+                        if (f[index] < 0)
+                        {
+                            break;
+                        }
+                        index += 1;
+                    } while (++vcirc != done && index < 3);
+                }
+                mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
+            }
+        }
+    }
 }
