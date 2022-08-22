@@ -5,15 +5,10 @@ __cc_find(MMesh)
 __cc_find(Eigen)
 __cc_find(CGAL)
 
-__assert_target(trimesh2)
-=======
 __cc_find(TriMesh2)
 __assert_target(trimesh2)
-
-__cc_find(Boost)
-__cc_find(Eigen)
 __cc_find(tbb)
->>>>>>> master
+
 __assert_target(boost_system)
 __assert_target(clipper)
 __assert_target(mmesh)

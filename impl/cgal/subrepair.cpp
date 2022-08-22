@@ -1,6 +1,13 @@
 #include "subrepair.h"
 #include "../cconversion.h"
 
+#include <CGAL/Polygon_mesh_processing/compute_normal.h>
+
+
+typedef boost::graph_traits<CMesh>::vertex_descriptor      vertex_descriptor;
+typedef boost::graph_traits<CMesh>::face_descriptor        face_descriptor;
+typedef K::Vector_3                                               Vector;
+
 namespace cmesh
 {
     // Optional visitor for orientating a polygon soup to demonstrate usage for some functions.
@@ -224,6 +231,10 @@ namespace cmesh
         {
             //CGAL::Polygon_mesh_processing::orient(cmesh);
         }
+
+        auto vnormals = cmesh.add_property_map<vertex_descriptor, Vector>("v:normals", CGAL::NULL_VECTOR).first;
+        auto fnormals = cmesh.add_property_map<face_descriptor, Vector>("f:normals", CGAL::NULL_VECTOR).first;
+        PMP::compute_normals(cmesh, vnormals, fnormals);
 
         ////if (!CGAL::Polygon_mesh_processing::is_outward_oriented(cmesh))
         ////{
