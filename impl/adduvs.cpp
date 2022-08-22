@@ -233,10 +233,10 @@ namespace cmesh
                             if (mesh->faceUVs[nf][(n + 2) % 3] < 0 && fuv2 >= 0)
                                 mesh->faceUVs[nf][(n + 2) % 3] = fuv2;
 
-                            if (mesh->textureIDs[acrossfn] > -1)
-                            {
-                                mesh->textureIDs[nf] = mesh->textureIDs[acrossfn];
-                            }
+                            //if (mesh->textureIDs[acrossfn] > -1)
+                            //{
+                            //    mesh->textureIDs[nf] = mesh->textureIDs[acrossfn];
+                            //}
 
                             isnewEdge[nf] = true;
                             return;
@@ -304,10 +304,10 @@ namespace cmesh
                             if (mesh->faceUVs[nf][(n + 2) % 3] < 0 && fuv2 >= 0)
                                 mesh->faceUVs[nf][(n + 2) % 3] = fuv2;
 
-                            if (mesh->textureIDs[acrossfn] > -1)
-                            {
-                                mesh->textureIDs[nf] = mesh->textureIDs[acrossfn];
-                            }
+                            //if (mesh->textureIDs[acrossfn] > -1)
+                            //{
+                            //    mesh->textureIDs[nf] = mesh->textureIDs[acrossfn];
+                            //}
                             return;
                         }
 
@@ -381,8 +381,8 @@ namespace cmesh
 
             isnewEdge.insert(isnewEdge.end(), len, false);
 
-            int lenId = mesh->faces.size() - mesh->textureIDs.size();
-            mesh->textureIDs.insert(mesh->textureIDs.end(), lenId, 0);
+            //int lenId = mesh->faces.size() - mesh->textureIDs.size();
+            //mesh->textureIDs.insert(mesh->textureIDs.end(), lenId, 0);
         }
 
         mesh->clear_normals();
