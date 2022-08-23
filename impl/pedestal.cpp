@@ -18,6 +18,31 @@ namespace cmesh
 				return nullptr;
 		}
 
+		//×Ô¶¯¼ì²â
+		if (apram.adirection == Direction::automatic)
+		{
+			std::vector<CMesh> inputcmeshspre;
+			splitTmesh2Cmesh2(mesh, inputcmeshspre, tracer);
+			if (inputcmeshspre.size() == 0)
+				return nullptr;
+
+			if (tracer) tracer->progress(0.3f);
+			if (tracer)
+			{
+				if (tracer->interrupt())
+					return nullptr;
+			}
+
+			if (directionDetection(inputcmeshspre[0], mesh, tracer))
+			{
+				apram.adirection = Direction::down;
+			}
+			else
+			{
+				apram.adirection = Direction::uper;
+			}
+		}
+
 		float fZ = 0.0;
 		if (apram.adirection== Direction::down)
 		{
@@ -38,7 +63,7 @@ namespace cmesh
 		if (inputcmeshs.size() == 0)
 			return nullptr;
 
-		if (tracer) tracer->progress(0.4f);
+		if (tracer) tracer->progress(0.5f);
 		if (tracer)
 		{
 			if (tracer->interrupt())

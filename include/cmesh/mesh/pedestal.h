@@ -7,7 +7,7 @@ namespace cmesh
 {
 	enum class Direction
 	{
-		//automatic,
+		automatic,
 		uper,
 		down
 	};
