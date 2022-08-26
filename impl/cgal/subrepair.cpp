@@ -142,19 +142,22 @@ namespace cmesh
             case cmesh::CGALHoleFillType::CGAL_TRIANGULATE:
                 PMP::triangulate_hole(cmesh,
                     h,
-                    std::back_inserter(patch_facets));
+                    std::back_inserter(patch_facets),
+                    CGAL::parameters::use_delaunay_triangulation(true));
                 break;
             case cmesh::CGALHoleFillType::CGAL_REFINED:
                 PMP::triangulate_and_refine_hole(cmesh,
                     h,
                     std::back_inserter(patch_facets),
-                    std::back_inserter(patch_vertices));
+                    std::back_inserter(patch_vertices),
+                    CGAL::parameters::use_delaunay_triangulation(true));
                 break;
-            case cmesh::CGALHoleFillType::CGAL_FAIRED:
+            case cmesh::CGALHoleFillType::CGAL_FAIRED://CGAL::Parallel_if_available_tag
                 std::get<0>(PMP::triangulate_refine_and_fair_hole(cmesh,
                     h,
                     std::back_inserter(patch_facets),
-                    std::back_inserter(patch_vertices)));
+                    std::back_inserter(patch_vertices),
+                    CGAL::parameters::use_delaunay_triangulation(true)));
                 break;
             default:
                 break;
