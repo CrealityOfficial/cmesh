@@ -13,7 +13,7 @@ __assert_target(boost_system)
 __assert_target(clipper)
 __assert_target(mmesh)
 
-__enable_cxx17()
+__enable_cxx14()
 if(NOT EIGEN_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
 endif()
