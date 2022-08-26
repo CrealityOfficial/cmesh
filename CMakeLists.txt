@@ -22,6 +22,7 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif ()
 
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++14")
 add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
 __cc_find(CGAL)
 
