@@ -13,6 +13,7 @@ __assert_target(boost_system)
 __assert_target(clipper)
 __assert_target(mmesh)
 
+__enable_cxx17()
 if(NOT EIGEN_INCLUDE_DIRS)
 	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
 endif()
@@ -22,7 +23,6 @@ if (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif ()
 
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++14")
 add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
 __cc_find(CGAL)
 
