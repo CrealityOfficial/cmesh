@@ -10,5 +10,11 @@ namespace cmesh
     CMESH_API trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, trimesh::TriMesh* mesh2,RepairMenuParamIn& paramIn, ccglobal::Tracer* trace = nullptr);
 
     CMESH_API trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, ccglobal::Tracer* trace = nullptr);
+
+    CMESH_API trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* trace = nullptr);
+
+    CMESH_API trimesh::TriMesh* subRepairMenuCloud(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* trace = nullptr);
+   
+    CMESH_API trimesh::TriMesh* subRepairHolesCloud(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* trace = nullptr);
 }
 #endif // CMESH_SUBREPAIRMENU_1648026566432_H

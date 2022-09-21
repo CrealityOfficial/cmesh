@@ -2,6 +2,7 @@
 #include "subrepair.h"
 #include "../cconversion.h"
 #include "../ctype.h"
+#include "cmesh/uvs/adduvs.h"
 
 //TODO:test error data
 //#include "cmesh/mesh/repair.h"
@@ -76,11 +77,58 @@ namespace cmesh
         return newMesh;
     }
 
-    trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer)
+    void copyUvsInfo(trimesh::TriMesh* dest, trimesh::TriMesh* src)
+    {
+        if (!dest || !src)
+        {
+            return;
+        }
+
+        dest->UVs = src->UVs;
+
+        dest->faceUVs = src->faceUVs;
+
+        if (dest->faceUVs.size() < dest->faces.size())
+        {
+            addUVs(dest);
+        }
+
+        dest->materials = src->materials;
+        dest->mtlName = src->mtlName;
+        
+        size_t count = sizeof(src->map_bufferSize) / sizeof(int);
+        for (size_t i = 0; i < count; i++)
+        {
+            dest->map_bufferSize[i] = src->map_bufferSize[i];
+            dest->map_buffers[i] = src->map_buffers[i];
+            src->map_buffers[i] = nullptr;
+        }
+    }
+
+    bool hasTexture(trimesh::TriMesh* mesh)
+    {
+        if (mesh)
+        {
+            size_t count = sizeof(mesh->map_bufferSize) / sizeof(int);
+            for (size_t i = 0; i < count; i++)
+            {
+                if (mesh->map_buffers[i] != nullptr)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    trimesh::TriMesh* subMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, bool cloudService, ccglobal::Tracer* tracer)
     {
         ////TODO:test error data
-        //ErrorInfo info;
-        //getErrorInfo(mesh,info);
+//ErrorInfo info;
+//getErrorInfo(mesh,info);
+
+       bool hastexture = hasTexture(mesh);
 
         if (!mesh)
             return nullptr;
@@ -94,7 +142,7 @@ namespace cmesh
 
         //输入
         CMesh cmesh1;
-        _convertT2CForNoRepair(*mesh, cmesh1,true);
+        _convertT2CForNoRepair(*mesh, cmesh1, cloudService ? false:true);
 
         if (tracer)
         {
@@ -112,7 +160,8 @@ namespace cmesh
         //}
 
         //三角化网格
-        CGALtriangulate(cmesh1);
+        if (!hastexture)
+            CGALtriangulate(cmesh1);
 
         if (tracer)
         {
@@ -128,7 +177,8 @@ namespace cmesh
         //CGALselfIntersections(cmesh1, faceIndex, true, tracer);
 
         ////非流顶点面检测
-        CGALmanifoldness(cmesh1, tracer);    
+        if (!hastexture)
+            CGALmanifoldness(cmesh1, tracer);
 
         if (tracer)
         {
@@ -138,7 +188,8 @@ namespace cmesh
         }
 
         ////重叠面检测
-        CGALstitch(cmesh1, tracer);
+        if (!hastexture)
+            CGALstitch(cmesh1, tracer);
 
         if (tracer)
         {
@@ -150,7 +201,7 @@ namespace cmesh
         //CGALconnectedComponents(cmesh1, tracer);
 
         //孔洞填充
-        CGALholeFill(cmesh1, CGALHoleFillType::CGAL_FAIRED, tracer);
+        CGALholeFill(cmesh1, refine_and_fair_hole?CGALHoleFillType::CGAL_FAIRED : CGALHoleFillType::CGAL_REFINED, tracer);
 
         if (tracer)
         {
@@ -160,11 +211,12 @@ namespace cmesh
         }
 
         //if (!CGALselfIntersections(cmesh1, faceIndex, true, tracer))
-        if(CGAL::is_valid_polygon_mesh(cmesh1))
-        {
-            //方向修复
-            CGALorientation(cmesh1, false, tracer);
-        }
+        if (!hastexture)
+            if (CGAL::is_valid_polygon_mesh(cmesh1))
+            {
+                //方向修复
+                CGALorientation(cmesh1, false, tracer);
+            }
 
         if (tracer)
         {
@@ -173,7 +225,8 @@ namespace cmesh
                 return nullptr;
         }
 
-        CGALholeFill(cmesh1, CGALHoleFillType::CGAL_FAIRED, tracer);
+        if (!hastexture)
+            CGALholeFill(cmesh1, refine_and_fair_hole ? CGALHoleFillType::CGAL_FAIRED : CGALHoleFillType::CGAL_REFINED, tracer);
 
         if (tracer)
         {
@@ -184,19 +237,135 @@ namespace cmesh
 
         //输出
         trimesh::TriMesh* newMesh = new trimesh::TriMesh;
-         _convertC2T(cmesh1, *newMesh);
+        _convertC2T(cmesh1, *newMesh);
 
-         if (tracer)
-         {
-             tracer->progress(1.0f);
-             if (tracer->interrupt())
-                 return nullptr;
-         }
+        if (tracer)
+        {
+            tracer->progress(1.0f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
 
-         //TODO:test error data
-         //info.edgeNum = 0;
-         //getErrorInfo(newMesh, info);
+        if (hastexture)
+            copyUvsInfo(newMesh, mesh);
+        //TODO:test error data
+        //info.edgeNum = 0;
+        //getErrorInfo(newMesh, info);
 
+        newMesh->need_bbox();
         return newMesh;
+    }
+
+    trimesh::TriMesh* subHoles(trimesh::TriMesh* mesh, bool refine_and_fair_hole, bool cloudService, ccglobal::Tracer* tracer)
+    {
+        bool hastexture = hasTexture(mesh);
+
+        if (!mesh)
+            return nullptr;
+
+        if (tracer)
+        {
+            tracer->progress(0.2f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        //输入
+        CMesh cmesh1;
+        _convertT2CForNoRepair(*mesh, cmesh1, cloudService ? false : true);
+
+        if (tracer)
+        {
+            tracer->progress(0.3f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (tracer)
+        {
+            tracer->progress(0.4f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (tracer)
+        {
+            tracer->progress(0.5f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (tracer)
+        {
+            tracer->progress(0.6f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        //CGALconnectedComponents(cmesh1, tracer);
+
+        //孔洞填充
+        CGALholeFill(cmesh1, refine_and_fair_hole ? CGALHoleFillType::CGAL_FAIRED : CGALHoleFillType::CGAL_REFINED, tracer);
+
+        if (tracer)
+        {
+            tracer->progress(0.7f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (tracer)
+        {
+            tracer->progress(0.8f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (tracer)
+        {
+            tracer->progress(0.9f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        //输出
+        trimesh::TriMesh* newMesh = new trimesh::TriMesh;
+        _convertC2T(cmesh1, *newMesh);
+
+        if (tracer)
+        {
+            tracer->progress(1.0f);
+            if (tracer->interrupt())
+                return nullptr;
+        }
+
+        if (hastexture)
+            copyUvsInfo(newMesh, mesh);
+        //TODO:test error data
+        //info.edgeNum = 0;
+        //getErrorInfo(newMesh, info);
+
+        newMesh->need_bbox();
+        return newMesh;
+    }
+
+    trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, ccglobal::Tracer* tracer)
+    {
+        return subMenu(mesh, true, false, tracer);
+    }
+
+    trimesh::TriMesh* subRepairMenu(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* trace)
+    {
+        return subMenu(mesh, refine_and_fair_hole, false, trace);
+    }
+
+    trimesh::TriMesh* subRepairMenuCloud(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+    {
+        return subMenu(mesh, refine_and_fair_hole, true, tracer);
+    }
+
+    trimesh::TriMesh* subRepairHolesCloud(trimesh::TriMesh* mesh, bool refine_and_fair_hole, ccglobal::Tracer* tracer)
+    {
+        return subHoles(mesh, refine_and_fair_hole, true, tracer);
     }
 }
