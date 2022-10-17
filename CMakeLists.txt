@@ -79,7 +79,11 @@ set(LIBS trimesh2 clipper boost_system mmesh tbb)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
 if(USE_IGL)
-	list(APPEND INCS ${BOOST_INCLUDE_DIRS} ${mpfr_INCLUDE_DIRS})	
+	__cc_find(gmp)
+	__cc_find(mpfr)
+	add_subdirectory(igl)
+	
+	list(APPEND INCS ${BOOST_INCLUDE_DIRS})	
 	list(APPEND DEFS IGL_STATIC_LIBRARY CGAL_USE_CORE=1)	
 	list(APPEND LIBS igl copyleft mpfr gmp)	
 endif()
