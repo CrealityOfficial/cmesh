@@ -148,7 +148,7 @@ set(SRCS marching_cubes.cpp
 		cgal/wire_mesh.h
 		)
 		
-set(LIBS igl gmp tbb)
+set(LIBS igl gmp tbb mpfr)
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${CGAL_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS})
 set(DEFS IGL_STATIC_LIBRARY CGAL_USE_CORE=1)
 
