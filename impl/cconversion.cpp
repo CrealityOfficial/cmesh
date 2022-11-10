@@ -64,10 +64,55 @@ namespace cmesh
             for (const trimesh::TriMesh::Face& f : tmesh.faces) {
                 if (f.x != f.y && f.x != f.z && f.y != f.z)
                 {
+
                     mesh.add_face(vertexdescriptor[f.x], vertexdescriptor[f.y], vertexdescriptor[f.z]);
                 }
             }
         }
+    }
+
+    
+    bool _convertT2CCGAL(trimesh::TriMesh& tmesh, CMesh& mesh, bool needRepair)
+    {
+        std::vector<Point> points;
+        std::vector<std::vector<std::size_t> > faces;
+        for (const trimesh::point& p : tmesh.vertices) {
+            points.push_back(Point(p.x, p.y, p.z));
+        }
+        for (const trimesh::TriMesh::Face& f : tmesh.faces) {
+            std::vector<std::size_t> vec;
+            vec.push_back(f.x);
+            vec.push_back(f.y);
+            vec.push_back(f.z);
+            faces.push_back(vec);
+        }
+
+        //if (!CGAL::IO::read_polygon_soup(fname, points, faces))
+        //{
+        //    if (verbose)
+        //        std::cerr << "Warning: cannot read polygon soup" << std::endl;
+        //    return false;
+        //}
+
+        if (needRepair)
+            PMP::repair_polygon_soup(points, faces);
+
+        if (!PMP::orient_polygon_soup(points, faces))
+        {
+            //if (verbose)
+            //    std::cerr << "Some duplication happened during polygon soup orientation" << std::endl;
+        }
+
+        if (!PMP::is_polygon_soup_a_polygon_mesh(faces))
+        {
+            //if (verbose)
+                //std::cerr << "Warning: polygon soup does not describe a polygon mesh" << std::endl;
+            return false;
+        }
+
+        PMP::polygon_soup_to_polygon_mesh(points, faces, mesh);
+
+        return true;
     }
 
 	void _convertC2T(const CMesh& mesh, trimesh::TriMesh& tmesh)

@@ -142,7 +142,14 @@ namespace cmesh
 
         // ‰»Î
         CMesh cmesh1;
-        _convertT2CForNoRepair(*mesh, cmesh1, cloudService ? false:true);
+        _convertT2CCGAL(*mesh, cmesh1);
+
+        //for test
+        //if (!PMP::IO::read_polygon_mesh("F://model/1.stl", cmesh1))
+        //{
+        //    std::cerr << "Invalid input." << std::endl;
+        //}
+
 
         if (tracer)
         {
