@@ -127,14 +127,43 @@ namespace cmesh
         }
     }
 
+    bool is_small_hole(halfedge_descriptor h, CMesh& mesh,
+        double max_hole_diam, int max_num_hole_edges)
+    {
+        int num_hole_edges = 0;
+        CGAL::Bbox_3 hole_bbox;
+        for (halfedge_descriptor hc : CGAL::halfedges_around_face(h, mesh))
+        {
+            const Point& p = mesh.point(target(hc, mesh));
+            hole_bbox += p.bbox();
+            ++num_hole_edges;
+            // Exit early, to avoid unnecessary traversal of large holes
+            if (num_hole_edges > max_num_hole_edges) return false;
+            //if (hole_bbox.xmax() - hole_bbox.xmin() > max_hole_diam) return false;
+            //if (hole_bbox.ymax() - hole_bbox.ymin() > max_hole_diam) return false;
+            //if (hole_bbox.zmax() - hole_bbox.zmin() > max_hole_diam) return false;
+        }
+        return true;
+    }
+
     void CGALholeFill(CMesh& cmesh, CGALHoleFillType type, ccglobal::Tracer* trace)
     {
         std::vector<halfedge_descriptor> border_cycles;
         // collect one halfedge per boundary cycle
         PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
 
+        int max_hole_diam = 100;
+        int max_num_hole_edges = 1000;  //È±¿ÚÌ«´ó²»ÐÞ¸´
         for (halfedge_descriptor h : border_cycles)
         {
+            if (max_hole_diam > 0 && max_num_hole_edges > 0 &&
+                !is_small_hole(h, cmesh, max_hole_diam, max_num_hole_edges))
+            {
+                trace->failed("repair failed!");
+                continue;
+            }
+               
+
             std::vector<face_descriptor>  patch_facets;
             std::vector<vertex_descriptor> patch_vertices;
             switch (type)

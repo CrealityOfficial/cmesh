@@ -32,18 +32,14 @@ namespace cmesh
 			return;
 		}
 
-		//int normalNum = 0;
-		//for (halfedge_descriptor h : halfedges(cmesh))
-		//{
-		//	if (is_border(h, cmesh))
-		//	{
-		//		info.edgeNum++;
-		//	}
-		//	else if (is_isolated_triangle(h, cmesh))
-		//	{
-		//		normalNum++;
-		//	}
-		//}
+		int edgeNum = 0;
+		for (halfedge_descriptor h : halfedges(cmesh))
+		{
+			if (is_border(h, cmesh))
+			{
+                edgeNum++;
+			}
+		}
 		//if (normalNum==0 && CGAL::is_closed(cmesh))
 		//{
 		//	try {
@@ -62,15 +58,26 @@ namespace cmesh
         std::vector<face_descriptor>  patch_facets;
         std::vector<halfedge_descriptor> border_cycles;
         PMP::extract_boundary_cycles(cmesh, std::back_inserter(border_cycles));
-        for (halfedge_descriptor h : border_cycles)
+        if (edgeNum > 1000 )  //ºÄÊ±
         {
-            patch_facets.clear();
-            PMP::triangulate_hole(cmesh,
-                h,
-                std::back_inserter(patch_facets));
-
-            info.edgeNum += patch_facets.size()*3;
+            info.edgeNum = edgeNum;
         }
+        else
+        {
+            for (halfedge_descriptor h : border_cycles)
+            {
+                patch_facets.clear();
+                PMP::triangulate_hole(cmesh,
+                    h,
+                    std::back_inserter(patch_facets));
+
+                info.edgeNum += patch_facets.size() * 3;
+
+                if (info.edgeNum)
+                    break;
+            }
+        }
+
 
         //if (!CGALselfIntersections(cmesh1, faceIndex, true, tracer))
         if (CGAL::is_valid_polygon_mesh(cmesh))
