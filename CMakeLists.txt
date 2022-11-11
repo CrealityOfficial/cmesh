@@ -8,15 +8,14 @@ __cc_find(CGAL)
 __cc_find(TriMesh2)
 __assert_target(trimesh2)
 __cc_find(tbb)
+__assert_target(tbb)
 
 __assert_target(boost_system)
 __assert_target(clipper)
 __assert_target(mmesh)
+__assert_target(eigen)
 
 __enable_cxx14()
-if(NOT EIGEN_INCLUDE_DIRS)
-	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
-endif()
 
 if (MSVC)
   add_definitions(/bigobj)
@@ -75,7 +74,7 @@ endif()
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS trimesh2 clipper boost_system mmesh tbb)
+set(LIBS trimesh2 clipper boost_system mmesh tbb eigen)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
 if(USE_IGL)
