@@ -79,7 +79,9 @@ set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TB
 
 if(USE_IGL)
 	__cc_find(gmp)
+	__assert_target(gmp)
 	__cc_find(mpfr)
+	__assert_target(mpfr)
 	add_subdirectory(igl)
 	
 	list(APPEND INCS ${BOOST_INCLUDE_DIRS})	
