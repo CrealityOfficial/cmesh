@@ -159,12 +159,12 @@ namespace cmesh
         }
 
         ////×Ô½»¼ì²â
-        std::vector<int> faceIndex;
-        if (CGALselfIntersections(cmesh1, faceIndex, true, tracer))
-        {
-            //¿×¶´Ìî³ä
-            CGALholeFill(cmesh1, CGALHoleFillType::CGAL_FAIRED, tracer);
-        }
+        //std::vector<int> faceIndex;
+        //if (CGALselfIntersections(cmesh1, faceIndex, true, tracer))
+        //{
+        //    //¿×¶´Ìî³ä
+        //    CGALholeFill(cmesh1, CGALHoleFillType::CGAL_FAIRED, tracer);
+        //}
 
         //Èý½Ç»¯Íø¸ñ
         if (!hastexture)
@@ -178,7 +178,7 @@ namespace cmesh
         }
 
         //×Ô½»¼ì²â
-        //std::vector<int> faceIndex;
+        std::vector<int> faceIndex;
         //×Ô½»¼ì²â
         //faceIndex.clear();
         //CGALselfIntersections(cmesh1, faceIndex, true, tracer);
@@ -208,7 +208,6 @@ namespace cmesh
         //CGALconnectedComponents(cmesh1, tracer);
 
         //¿×¶´Ìî³ä
-
         CGALholeFill(cmesh1, refine_and_fair_hole?CGALHoleFillType::CGAL_FAIRED : CGALHoleFillType::CGAL_REFINED, tracer);
 
         if (tracer)
