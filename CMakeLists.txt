@@ -3,12 +3,11 @@ __assert_target(trimesh2)
 
 __cc_find(Boost)
 __cc_find(Eigen)
+__cc_find(CGAL)
+__assert_target(cgal)
+__assert_target(eigen)
 __cc_find(tbb)
 __assert_target(boost_system)
-
-if(NOT EIGEN_INCLUDE_DIRS)
-	message(FATAL_ERROR "Please Specified EIGEN_INCLUDE_DIRS")
-endif()
 
 if (MSVC)
   add_definitions(/bigobj)
@@ -16,10 +15,6 @@ if (MSVC)
 endif ()
 
 add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
-__cc_find(CGAL)
-if(NOT CGAL_INCLUDE_DIRS)
-	message(FATAL_ERROR "Please Specified CGAL_INCLUDE_DIRS")
-endif()
 
 set(SRCS include/cmesh/interface.h
 		 include/cmesh/poly/roof.h
@@ -64,9 +59,9 @@ endif()
 
 		
 
-set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
+set(INCS ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS trimesh2 clipper boost_system mmesh tbb)
+set(LIBS trimesh2 clipper boost_system mmesh tbb cgal eigen)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
 if(USE_IGL)
