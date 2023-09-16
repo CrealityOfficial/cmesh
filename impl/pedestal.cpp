@@ -4,8 +4,7 @@
 #include "cconversion.h"
 #include "repairNew.h"
 
-#include "mmesh/trimesh/trimeshutil.h"
-#include "mmesh/util/dumplicate.h"
+#include "mmesh/trimeshutil.h"
 
 namespace cmesh
 {

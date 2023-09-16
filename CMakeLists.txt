@@ -1,19 +1,18 @@
-__cc_find(Trimesh2)
-__cc_find(Boost)
-__cc_find(Clipper)
-__cc_find(MMesh)
-__cc_find(Eigen)
-__cc_find(CGAL)
-
-__cc_find(TriMesh2)
+__cc_find(trimesh2)
 __assert_target(trimesh2)
+__cc_find(eigen)
+__assert_target(eigen)
+
+__cc_find(cgal)
+__assert_target(cgal)
+
 __cc_find(tbb)
 __assert_target(tbb)
 
-__assert_target(boost_system)
+__conan_import(boost dll COMPONENT boost_system)
+
+__cc_find(clipper)
 __assert_target(clipper)
-__assert_target(mmesh)
-__assert_target(eigen)
 
 __enable_cxx14()
 
@@ -23,78 +22,23 @@ if (MSVC)
 endif ()
 
 add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
-__cc_find(CGAL)
 
-if(NOT CGAL_INCLUDE_DIRS)
-	message(FATAL_ERROR "Please Specified CGAL_INCLUDE_DIRS")
-endif()
-
-set(SRCS include/cmesh/interface.h
-		 include/cmesh/poly/roof.h
-		 include/cmesh/mesh/boolean.h
-		 include/cmesh/mesh/richmesh.h
-		 include/cmesh/mesh/repair.h
-                	 include/cmesh/mesh/pedestal.h
-		 include/cmesh/cgal/subrepairmenu.h
-		 include/cmesh/cgal/subrepairtype.h
-        		 include/cmesh/uvs/adduvs.h
-		 
-		 impl/roof.cpp
-		 impl/boolean.cpp
-		 impl/richmesh.cpp
-		 impl/richmeshimpl.h
-		 impl/richmeshimpl.cpp
-		 impl/ctype.h
-		 impl/cboolean.cpp
-		 impl/cboolean.h
-		 impl/cconversion.h
-		 impl/cconversion.cpp
-		 impl/repair.cpp
-		 impl/cholefill.h
-		 impl/cholefill.cpp
-		 impl/tmeshutil.h
-		 impl/tmeshutil.cpp
-		 impl/repairNew.h
-		 impl/repairNew.cpp
-		 impl/pedestal.cpp
-		 impl/cgal/subrepair.h
-		 impl/cgal/subrepair.cpp
-		 impl/cgal/subrepairmenu.cpp
-		 impl/adduvs.cpp
-		 )
-		 
-if(USE_IGL)
-		list(APPEND SRCS 
-			include/cmesh/igl/booleanigl.h
-			impl/igl/booleanigl.cpp
-			)
-endif()
-
-		
+__files_group(${CMAKE_CURRENT_SOURCE_DIR}/include/ EXTERNAL_SRCS)
+__files_group_2(${CMAKE_CURRENT_SOURCE_DIR}/impl/ internal INTERNAL_SRCS)
+set(SRCS ${EXTERNAL_SRCS} ${INTERNAL_SRCS})
 
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
-set(LIBS clipper boost_system mmesh tbb eigen)
+
+set(LIBS clipper boost_system tbb eigen cgal)
 set(ILIBS trimesh2)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
-
-if(USE_IGL)
-	__cc_find(gmp)
-	__assert_target(gmp)
-	__cc_find(mpfr)
-	__assert_target(mpfr)
-	add_subdirectory(igl)
-	
-	list(APPEND INCS ${BOOST_INCLUDE_DIRS})	
-	list(APPEND DEFS IGL_STATIC_LIBRARY CGAL_USE_CORE=1)	
-	list(APPEND LIBS igl copyleft mpfr gmp)	
-endif()
 
 __add_common_library(cmesh)
 
 add_definitions(-DCGAL_NO_GMP=0)
 add_definitions(-DCGAL_NO_MPFR=0)
 
-if(CC_INSTALL_CMESH)
-	__install_directory_specif(${CMAKE_CURRENT_SOURCE_DIR}/include/ cmesh)
+if(CC_INSTALL_CMESH_NOIGL)
+	__install_directory_specif(${CMAKE_CURRENT_SOURCE_DIR}/include/ cmesh_noigl)
 endif()

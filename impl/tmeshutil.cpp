@@ -1,7 +1,7 @@
 #include "tmeshutil.h"
 
-#include "mmesh/trimesh/meshtopo.h"
-#include "mmesh/trimesh/trimeshutil.h"
+#include "mmesh/meshtopo.h" 
+#include "mmesh/trimeshutil.h"
 
 #include "ccglobal/tracer.h"
 

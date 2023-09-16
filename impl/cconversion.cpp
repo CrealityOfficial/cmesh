@@ -1,6 +1,5 @@
 #include "cconversion.h"
 #include <CGAL/Polygon_mesh_processing/IO/polygon_mesh_io.h>
-#include "mmesh/trimesh/algrithm3d.h"
 
 namespace cmesh
 {

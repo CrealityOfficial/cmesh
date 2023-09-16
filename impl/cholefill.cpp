@@ -1,6 +1,6 @@
 #include "cholefill.h"
-#include "mmesh/trimesh/polygonstack.h"
-#include "mmesh/trimesh/savepolygonstack.h"
+#include "mmesh/polygonstack.h"
+#include "mmesh/savepolygonstack.h"
 #include "repairNew.h"
 #include "clipper/clipper.hpp"
 #include <algorithm>

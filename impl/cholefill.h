@@ -2,7 +2,7 @@
 #define HOLEFILL_1605318972342_H
 #include "richmeshimpl.h"
 #include "ccglobal/tracer.h"
-#include "mmesh/trimesh/trimeshutil.h"
+#include "trimesh2/TriMesh.h"
 
 namespace cmesh
 {

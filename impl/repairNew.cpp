@@ -1,7 +1,7 @@
 #include "cconversion.h"
 #include "ccglobal/tracer.h"
 
-#include "mmesh/trimesh/trimeshutil.h"
+#include "mmesh/trimeshutil.h"
 #include "tmeshutil.h"
 #include "cholefill.h"
 

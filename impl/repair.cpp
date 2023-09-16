@@ -3,8 +3,8 @@
 #include "tmeshutil.h"
 #include "cconversion.h"
 
-#include "mmesh/trimesh/trimeshutil.h"
-#include "mmesh/util/dumplicate.h"
+#include "mmesh/trimeshutil.h"
+#include "mmesh/dumplicate.h"
 
 #include "repairNew.h"
 
