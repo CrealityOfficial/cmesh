@@ -34,7 +34,7 @@ set(LIBS clipper boost_system tbb eigen cgal)
 set(ILIBS trimesh2)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
-__add_common_library(cmesh)
+__add_common_library(cmesh_noigl)
 
 add_definitions(-DCGAL_NO_GMP=0)
 add_definitions(-DCGAL_NO_MPFR=0)
