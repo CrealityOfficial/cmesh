@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "ccglobal/tracer.h"
 #include "trimesh2/TriMesh_algo.h"
+#include "trimeshutil.h"
 
 namespace mmesh
 {
