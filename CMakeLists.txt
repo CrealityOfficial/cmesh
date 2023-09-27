@@ -23,7 +23,7 @@ endif ()
 
 add_definitions( -DNOMINMAX -DCGAL_LINKED_WITH_TBB)
 
-__files_group(${CMAKE_CURRENT_SOURCE_DIR}/include/ EXTERNAL_SRCS)
+__files_group(${CMAKE_CURRENT_SOURCE_DIR}/include/cmesh/ EXTERNAL_SRCS)
 __files_group_2(${CMAKE_CURRENT_SOURCE_DIR}/impl/ internal INTERNAL_SRCS)
 set(SRCS ${EXTERNAL_SRCS} ${INTERNAL_SRCS})
 

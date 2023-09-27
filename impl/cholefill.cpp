@@ -213,39 +213,14 @@ namespace cmesh
                 points.push_back(trimesh::dvec2(aPoint_3.x(), aPoint_3.y()));
             } while (++circ1 != done);
 
-            ClipperLib::Path apath;
-            for (trimesh::dvec2 apoint : points)
-            {
-                apath.push_back(ClipperLib::IntPoint(apoint.x * 100.0, apoint.y * 100.0));
-            }
-            points.clear();
-
-            ClipperLib::Paths outPaths;
-            if (0)
-            {
-                ClipperLib::Paths apaths;
-                apaths.push_back(apath);
-                ClipperLib::Clipper alipper;
-                ClipperLib::PolyTree retval;
-                alipper.AddPath(apath, ClipperLib::ptClip, true);
-                alipper.Execute(ClipperLib::ClipType::ctUnion, retval, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-                ClipperLib::PolyTreeToPaths(retval, outPaths);
-            }
-            else
-            {
-                ClipperLib::SimplifyPolygon(apath, outPaths, ClipperLib::pftEvenOdd);
-            }
-
             std::vector<std::vector<int>> polygonses;
             int icount = 0;
-            for (ClipperLib::Path& apath : outPaths)
+            int pCount = (int)points.size();
+            polygonses.push_back(std::vector<int>());
+            for (trimesh::dvec2& apoint : points)
             {
-                polygonses.push_back(std::vector<int>());
-                for (ClipperLib::IntPoint& apoint : apath)
-                {
-                    polygonses[polygonses.size() - 1].push_back(icount++);
-                    points.push_back(trimesh::dvec2(apoint.X, apoint.Y));
-                }
+                polygonses[polygonses.size() - 1].push_back(pCount - icount - 1);
+                ++icount;
             }
 
             mmesh::PolygonStack apoly;
@@ -256,17 +231,17 @@ namespace cmesh
             {
                 if (n == 0)
                 {
-                    firstZ0Index = cmesh.add_vertex(Point(points[n].x / 100.0, points[n].y / 100.0, fZ));
+                    firstZ0Index = cmesh.add_vertex(Point(points[n].x, points[n].y, fZ));
                 }
                 else
                 {
-                    cmesh.add_vertex(Point(points[n].x / 100.0, points[n].y / 100.0, fZ));
+                    cmesh.add_vertex(Point(points[n].x, points[n].y, fZ));
                 }
             }
 
             for (int n = 0; n < triangles.size(); n++)
             {
-                cmesh.add_face(vertex_descriptor(triangles[n].at(0) + firstZ0Index), vertex_descriptor(triangles[n].at(1) + firstZ0Index), vertex_descriptor(triangles[n].at(2) + firstZ0Index));
+                cmesh.add_face(vertex_descriptor(triangles[n].at(0) + firstZ0Index), vertex_descriptor(triangles[n].at(2) + firstZ0Index), vertex_descriptor(triangles[n].at(1) + firstZ0Index));
             }
 
         }
