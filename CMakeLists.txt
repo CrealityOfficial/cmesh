@@ -9,7 +9,7 @@ __assert_target(cgal)
 __cc_find(tbb)
 __assert_target(tbb)
 
-__conan_import(boost dll COMPONENT boost_system)
+__cc_find(boost_static)
 
 __cc_find(clipper)
 __assert_target(clipper)
