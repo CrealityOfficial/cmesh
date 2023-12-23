@@ -6,8 +6,8 @@ __assert_target(eigen)
 __cc_find(cgal)
 __assert_target(cgal)
 
-__cc_find(tbb)
-__assert_target(tbb)
+__cc_find(tbb_static)
+__assert_target(tbb_static)
 
 __cc_find(boost_static)
 
@@ -30,7 +30,7 @@ set(SRCS ${EXTERNAL_SRCS} ${INTERNAL_SRCS})
 set(INCS ${EIGEN_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/include/ ${CGAL_INCLUDE_DIRS})
 set(INTERFACES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 
-set(LIBS clipper boost_system tbb eigen cgal)
+set(LIBS clipper boost_system tbb_static eigen cgal)
 set(ILIBS trimesh2)
 set(DEFS CGAL_NO_GMP=0 CGAL_NO_MPFR=0  CGAL_EIGEN3_ENABLED CGAL_HEADER_ONLY __TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
 
